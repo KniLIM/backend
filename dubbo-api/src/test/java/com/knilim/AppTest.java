@@ -1,4 +1,4 @@
-package com.KniLIM;
+package com.knilim;
 
 import static org.junit.Assert.assertTrue;
 

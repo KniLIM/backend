@@ -1,10 +1,10 @@
-package com.knilim.accountservice;
+package com.knilim.group;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AccountServiceApplicationTests {
+class GroupServiceApplicationTests {
 
     @Test
     void contextLoads() {
