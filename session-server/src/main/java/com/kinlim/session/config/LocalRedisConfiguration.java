@@ -21,7 +21,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 @Configuration
 public class LocalRedisConfiguration {
@@ -63,9 +62,9 @@ public class LocalRedisConfiguration {
     }
 
     @Bean("localConnectRedisTemplate")
-    public RedisTemplate<UUID, Connect> localConnectRedisTemplate(
+    public RedisTemplate<String, Connect> localConnectRedisTemplate(
             @Qualifier("localConnectRedisFactory") RedisConnectionFactory factory) {
-        RedisTemplate<UUID, Connect> template = new RedisTemplate<>();
+        RedisTemplate<String, Connect> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
@@ -77,9 +76,9 @@ public class LocalRedisConfiguration {
     }
 
     @Bean("localClientRedisTemplate")
-    public RedisTemplate<UUID, Client> localClientRedisTemplate(
+    public RedisTemplate<String, Client> localClientRedisTemplate(
             @Qualifier("localClientRedisFactory") RedisConnectionFactory factory) {
-        RedisTemplate<UUID, Client> template = new RedisTemplate<>();
+        RedisTemplate<String, Client> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
