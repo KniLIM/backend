@@ -1,4 +1,4 @@
-package com.kinlim.session;
+package com.knilim.session;
 
 import com.corundumstudio.socketio.SocketIOServer;
 import org.springframework.beans.factory.annotation.Autowired;

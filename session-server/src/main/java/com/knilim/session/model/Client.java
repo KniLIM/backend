@@ -1,27 +1,29 @@
-package com.kinlim.session.model;
+package com.knilim.session.model;
 
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Client implements Serializable {
+
     @Id
     private UUID userId;
 
-    private ArrayList<UUID> clients;
+    private List<UUID> clients;
 
-    public Client(UUID userId, ArrayList<UUID> clients) {
+    public Client(UUID userId) {
         this.userId = userId;
-        this.clients = clients;
+        this.clients = new ArrayList<>();
     }
 
     public UUID getUserId() {
         return userId;
     }
 
-    public ArrayList<UUID> getClients() {
+    public List<UUID> getClients() {
         return clients;
     }
 

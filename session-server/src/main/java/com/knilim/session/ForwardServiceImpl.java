@@ -1,4 +1,4 @@
-package com.kinlim.session;
+package com.knilim.session;
 
 import com.knilim.service.ForwardService;
 import com.knilim.utils.Tuple;

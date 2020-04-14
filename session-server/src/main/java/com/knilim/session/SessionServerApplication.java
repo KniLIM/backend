@@ -1,4 +1,4 @@
-package com.kinlim.session;
+package com.knilim.session;
 
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;

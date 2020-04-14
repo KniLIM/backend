@@ -1,17 +1,19 @@
-package com.kinlim.session.model;
+package com.knilim.session.model;
 
+import com.knilim.data.utils.Device;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 public final class Connect implements Serializable {
+
     @Id
     private UUID sessionId;
 
     private UUID userId;
 
-    private String device;
+    private Device device;
 
     private String host;
 
@@ -19,7 +21,7 @@ public final class Connect implements Serializable {
 
     private String key;
 
-    public Connect(UUID sessionId, UUID userId, String device, String host, Integer port, String key) {
+    public Connect(UUID sessionId, UUID userId, Device device, String host, Integer port, String key) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.device = device;
@@ -36,7 +38,7 @@ public final class Connect implements Serializable {
         return userId;
     }
 
-    public String getDevice() {
+    public Device getDevice() {
         return device;
     }
 

@@ -24,10 +24,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
@@ -41,6 +37,11 @@
         <dependency>
             <groupId>com.knilim</groupId>
             <artifactId>dubbo-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.knilim</groupId>
+            <artifactId>data</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

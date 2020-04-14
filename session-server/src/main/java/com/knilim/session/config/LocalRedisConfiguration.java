@@ -1,9 +1,8 @@
-package com.kinlim.session.config;
+package com.knilim.session.config;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.kinlim.session.model.Client;
-import com.kinlim.session.model.Connect;
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
+import com.knilim.session.model.Client;
+import com.knilim.session.model.Connect;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,24 +14,19 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class LocalRedisConfiguration {
 
-    @Bean
-    @ConfigurationProperties(prefix = "spring.redis.lettuce.pool")
+    @Bean("localRedisPoolConfig")
+    @ConfigurationProperties(prefix = "spring.redis1.lettuce.pool")
     public GenericObjectPoolConfig genericObjectPoolConfig() {
         return new GenericObjectPoolConfig();
     }
 
     @Bean("localConnectRedisConfiguration")
-    @ConfigurationProperties(prefix = "spring.redis")
+    @ConfigurationProperties(prefix = "spring.redis1")
     public RedisStandaloneConfiguration localConnectRedisConfiguration() {
         return new RedisStandaloneConfiguration();
     }
@@ -45,7 +39,7 @@ public class LocalRedisConfiguration {
 
     @Bean("localConnectRedisFactory")
     public LettuceConnectionFactory localConnectRedisFactory(
-            GenericObjectPoolConfig poolConfig,
+            @Qualifier("localRedisPoolConfig") GenericObjectPoolConfig poolConfig,
             @Qualifier("localConnectRedisConfiguration") RedisStandaloneConfiguration redisConfig) {
         LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
                 .poolConfig(poolConfig).build();
@@ -54,7 +48,7 @@ public class LocalRedisConfiguration {
 
     @Bean("localClientRedisFactory")
     public LettuceConnectionFactory localClientRedisFactory(
-            GenericObjectPoolConfig poolConfig,
+            @Qualifier("localRedisPoolConfig") GenericObjectPoolConfig poolConfig,
             @Qualifier("localClientRedisConfiguration") RedisStandaloneConfiguration redisConfig) {
         LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
                 .poolConfig(poolConfig).build();
@@ -68,9 +62,9 @@ public class LocalRedisConfiguration {
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonSerializer<>(Connect.class));
+        template.setValueSerializer(new FastJsonRedisSerializer<>(Connect.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonSerializer<>(Connect.class));
+        template.setHashValueSerializer(new FastJsonRedisSerializer<>(Connect.class));
         template.afterPropertiesSet();
         return template;
     }
@@ -82,41 +76,10 @@ public class LocalRedisConfiguration {
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonSerializer<>(Client.class));
+        template.setValueSerializer(new FastJsonRedisSerializer<>(Client.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonSerializer<>(Client.class));
+        template.setHashValueSerializer(new FastJsonRedisSerializer<>(Client.class));
         template.afterPropertiesSet();
         return template;
-    }
-}
-
-class FastJsonSerializer<T> implements RedisSerializer<T> {
-    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private final Class<T> clazz;
-
-    static {
-        ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
-    }
-
-    public FastJsonSerializer(Class<T> clazz) {
-        this.clazz = clazz;
-    }
-
-    @Override
-    public byte[] serialize(T item) throws SerializationException {
-        if (item == null) {
-            return new byte[0];
-        }
-
-        return JSON.toJSONString(item).getBytes(DEFAULT_CHARSET);
-    }
-
-    @Override
-    public T deserialize(byte[] bytes) throws SerializationException {
-        if (bytes == null || bytes.length < 1) {
-            return null;
-        }
-
-        return JSON.parseObject(new String(bytes, DEFAULT_CHARSET), clazz);
     }
 }
