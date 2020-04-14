@@ -5,6 +5,7 @@ import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.model.Online;
 import com.knilim.data.utils.Device;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,8 @@ public class OnlineDaoImpl implements OnlineDao {
     RedisTemplate<String, Online> template;
 
     @Autowired
-    public OnlineDaoImpl(RedisTemplate<String, Online> template) {
+    public OnlineDaoImpl(
+            @Qualifier("globalOnlineRedisTemplate") RedisTemplate<String, Online> template) {
         this.template = template;
     }
 

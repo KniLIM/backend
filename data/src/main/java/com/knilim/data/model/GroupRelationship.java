@@ -1,4 +1,4 @@
-package com.knilim.data.model.Group;
+package com.knilim.data.model;
 
 import java.sql.Timestamp;
 import java.util.UUID;

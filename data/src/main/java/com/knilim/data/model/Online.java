@@ -3,11 +3,12 @@ package com.knilim.data.model;
 import com.knilim.data.utils.Device;
 import org.springframework.data.annotation.Id;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Online {
+public class Online implements Serializable {
 
     @Id
     private UUID userId;
@@ -18,6 +19,11 @@ public class Online {
     public Online(UUID userId) {
         this.userId = userId;
         this.devices = new HashMap<>();
+    }
+
+    public Online(UUID userId, Map<Device, DeviceInfo> devices) {
+        this.userId = userId;
+        this.devices = devices;
     }
 
     public UUID getUserId() {

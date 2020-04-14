@@ -1,4 +1,4 @@
-package com.knilim.data.model.Group;
+package com.knilim.data.model;
 
 import org.springframework.data.annotation.Id;
 

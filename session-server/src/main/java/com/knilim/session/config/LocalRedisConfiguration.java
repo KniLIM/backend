@@ -1,6 +1,6 @@
 package com.knilim.session.config;
 
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
+import com.knilim.data.utils.FastJsonSerializer;
 import com.knilim.session.model.Client;
 import com.knilim.session.model.Connect;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -62,9 +62,9 @@ public class LocalRedisConfiguration {
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonRedisSerializer<>(Connect.class));
+        template.setValueSerializer(new FastJsonSerializer<>(Connect.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonRedisSerializer<>(Connect.class));
+        template.setHashValueSerializer(new FastJsonSerializer<>(Connect.class));
         template.afterPropertiesSet();
         return template;
     }
@@ -76,9 +76,9 @@ public class LocalRedisConfiguration {
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonRedisSerializer<>(Client.class));
+        template.setValueSerializer(new FastJsonSerializer<>(Client.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonRedisSerializer<>(Client.class));
+        template.setHashValueSerializer(new FastJsonSerializer<>(Client.class));
         template.afterPropertiesSet();
         return template;
     }
