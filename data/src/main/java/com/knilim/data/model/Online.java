@@ -12,6 +12,7 @@ public class Online {
     @Id
     private UUID userId;
 
+    // 设备映射表
     private Map<Device, DeviceInfo> devices;
 
     public Online(UUID userId) {
@@ -31,11 +32,20 @@ public class Online {
         return devices;
     }
 
+    public void connect(Device device) {
+        this.devices.get(device).connect();
+    }
+
     public void addDevice(Device device, String token, String ip, Integer port) {
         this.devices.put(device, new DeviceInfo(token, ip, port));
     }
 
     public void removeDevice(Device device) {
         this.devices.remove(device);
+    }
+
+    @Override
+    public String toString() {
+        return "Online{" + "userId=" + userId + ", devices=" + devices + '}';
     }
 }

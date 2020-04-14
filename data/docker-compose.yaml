@@ -9,3 +9,10 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: "123456"
     ports:
       - "27017:27017"
+
+  redis:
+    image: redis:latest
+    container_name: redis-online
+    command: redis-server --requirepass 123456
+    ports:
+      - "6379:6379"

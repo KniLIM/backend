@@ -15,6 +15,7 @@ public class Offline {
     @Field("user_id")
     private UUID userId;
 
+    // 离线消息字节流的数组
     @Field("msgs")
     private List<Byte[]> msgs;
 
@@ -29,5 +30,10 @@ public class Offline {
 
     public void addMsg(Byte[] data) {
         this.msgs.add(data);
+    }
+
+    @Override
+    public String toString() {
+        return "Offline{" + "userId=" + userId + ", msgs=" + msgs + '}';
     }
 }

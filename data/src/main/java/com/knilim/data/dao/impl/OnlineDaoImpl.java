@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,7 +23,8 @@ public class OnlineDaoImpl implements OnlineDao {
     }
 
     @Override
-    public void addOnlineDevice(UUID userId, Device device, String token, String ip, Integer port) {
+    public void addOnlineDevice(UUID userId, Device device, String token,
+                                String ip, Integer port) {
         Online result = template.opsForValue().get(userId.toString());
         if (result == null) {
             result = new Online(userId);
@@ -40,12 +42,35 @@ public class OnlineDaoImpl implements OnlineDao {
     }
 
     @Override
+    public boolean checkToken(UUID userId, Device device, String token) {
+        Online result = template.opsForValue().get(userId.toString());
+        if (result == null) {
+            return false;
+        }
+
+        DeviceInfo deviceInfo = result.getDevice(device);
+        if (deviceInfo == null) {
+            return false;
+        }
+
+        if (!deviceInfo.isConnect() && deviceInfo.getToken().equals(token)) {
+            result.connect(device);
+            template.opsForValue().set(userId.toString(), result);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public DeviceInfo getDevice(UUID userId, Device device) {
         Online result = template.opsForValue().get(userId.toString());
         if (result == null) {
             return null;
         }
-        return result.getDevice(device);
+
+        DeviceInfo deviceInfo = result.getDevice(device);
+        return deviceInfo.isConnect() ? deviceInfo : null;
     }
 
     @Override
@@ -54,6 +79,17 @@ public class OnlineDaoImpl implements OnlineDao {
         if (result == null) {
             return null;
         }
-        return result.getDevices();
+
+        // 过滤 status 不是 connected 的 device
+        Map<Device, DeviceInfo> devices = result.getDevices();
+        Iterator<Map.Entry<Device, DeviceInfo>> iterator = devices.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Device, DeviceInfo> entry = iterator.next();
+            if (!entry.getValue().isConnect()) {
+                iterator.remove();
+                iterator.next();
+            }
+        }
+        return devices;
     }
 }
