@@ -2,7 +2,7 @@ package com.knilim.service;
 
 import java.util.ArrayList;
 import java.util.UUID;
-import com.knilim.data.model.Group.Group;
+import com.knilim.data.model.group.Group;
 
 /**
  *  群组服务接口
@@ -17,11 +17,11 @@ public interface GroupService {
      * e.g.
      * <p><pre>{@code
      *      UUID groupId = UUID.randomUUID();
-     *      Group groupMsg = getGroupInfo(groupId);
+     *      group groupMsg = getGroupByGroupId(groupId);
      * }</pre></p>
      *
      */
-    Group getGroupInfo(UUID groupId);
+    Group getGroupByGroupId(UUID groupId);
 
     /**
      * 根据用户的user_id，返回该用户所在的群列表（进行适当冗余）
@@ -32,11 +32,11 @@ public interface GroupService {
      * e.g.
      * <p><pre>{@code
      *      UUID userId = UUID.randomUUID();
-     *      ArrayList<Group> res = getPersonalGroupList(userId);
+     *      ArrayList<group> res = getGroupsByUserId(userId);
      * }</pre></p>
      *
      */
-    ArrayList<Group> getPersonalGroupList(UUID userId);
+    ArrayList<Group> getGroupsByUserId(UUID userId);
 
     /**
      * 根据groupId得到所有群成员，然后查找在线数据库，将离线的用户和在线的用户分为两个列表。
