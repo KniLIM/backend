@@ -1,6 +1,6 @@
 package com.knilim.service;
 
-import com.knilim.utils.Tuple;
+import com.knilim.data.utils.Tuple;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package com.knilim.utils;
+package com.knilim.data.utils;
 
 public class Tuple<T, E> {
     private T first;
