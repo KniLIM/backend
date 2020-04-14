@@ -1,4 +1,4 @@
-package com.knilim.backend.config;
+package com.knilim.data.config;
 
 public class GobalRedisConfiguration {
 
