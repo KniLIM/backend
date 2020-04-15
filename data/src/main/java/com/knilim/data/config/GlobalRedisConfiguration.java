@@ -1,6 +1,7 @@
 package com.knilim.data.config;
 
-import com.knilim.data.model.Online;
+import com.knilim.data.model.DeviceInfo;
+import com.knilim.data.utils.Device;
 import com.knilim.data.utils.FastJsonSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +15,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.HashMap;
 
 @Configuration
 public class GlobalRedisConfiguration {
@@ -40,15 +43,15 @@ public class GlobalRedisConfiguration {
     }
 
     @Bean("globalOnlineRedisTemplate")
-    public RedisTemplate<String, Online> localConnectRedisTemplate(
+    public RedisTemplate<String, HashMap<Device, DeviceInfo>> localConnectRedisTemplate(
             @Qualifier("globalOnlineRedisConnectionFactory") RedisConnectionFactory factory) {
-        RedisTemplate<String, Online> template = new RedisTemplate<>();
+        RedisTemplate<String, HashMap<Device, DeviceInfo>> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonSerializer<>(Online.class));
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonSerializer<>(Online.class));
+        template.setValueSerializer(new FastJsonSerializer<>(DeviceInfo.class));
+        template.setHashKeySerializer(new FastJsonSerializer<>(Device.class));
+        template.setHashValueSerializer(new FastJsonSerializer<>(DeviceInfo.class));
         template.afterPropertiesSet();
         return template;
     }

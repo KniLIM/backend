@@ -2,13 +2,14 @@ package com.knilim.data.dao.impl;
 
 import com.knilim.data.dao.OnlineDao;
 import com.knilim.data.model.DeviceInfo;
-import com.knilim.data.model.Online;
 import com.knilim.data.utils.Device;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -16,48 +17,35 @@ import java.util.UUID;
 @Component
 public class OnlineDaoImpl implements OnlineDao {
 
-    RedisTemplate<String, Online> template;
-
-    @Autowired
-    public OnlineDaoImpl(
-            @Qualifier("globalOnlineRedisTemplate") RedisTemplate<String, Online> template) {
-        this.template = template;
-    }
+    @Resource
+    @Qualifier("globalOnlineRedisTemplate")
+    private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
 
     @Override
     public void addOnlineDevice(UUID userId, Device device, String token,
                                 String ip, Integer port) {
-        Online result = template.opsForValue().get(userId.toString());
-        if (result == null) {
-            result = new Online(userId);
-        }
-        result.addDevice(device, token, ip, port);
-        template.opsForValue().set(userId.toString(), result);
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        op.put(device, new DeviceInfo(token, ip, port));
     }
 
     @Override
     public void removeOnlineDevice(UUID userId, Device device) {
-        Online result = template.opsForValue().get(userId.toString());
-        if (result != null) {
-            result.removeDevice(device);
-        }
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        op.delete(device);
     }
 
     @Override
     public boolean checkToken(UUID userId, Device device, String token) {
-        Online result = template.opsForValue().get(userId.toString());
-        if (result == null) {
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        DeviceInfo info = op.get(device);
+
+        if (info == null) {
             return false;
         }
 
-        DeviceInfo deviceInfo = result.getDevice(device);
-        if (deviceInfo == null) {
-            return false;
-        }
-
-        if (!deviceInfo.isConnect() && deviceInfo.getToken().equals(token)) {
-            result.connect(device);
-            template.opsForValue().set(userId.toString(), result);
+        if (!info.isConnect() && info.getToken().equals(token)) {
+            info.connectToSession();
+            op.put(device, info);
             return true;
         }
 
@@ -66,32 +54,25 @@ public class OnlineDaoImpl implements OnlineDao {
 
     @Override
     public DeviceInfo getDevice(UUID userId, Device device) {
-        Online result = template.opsForValue().get(userId.toString());
-        if (result == null) {
-            return null;
-        }
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        DeviceInfo info = op.get(device);
 
-        DeviceInfo deviceInfo = result.getDevice(device);
-        return deviceInfo.isConnect() ? deviceInfo : null;
+        if (info != null && info.isConnect()) {
+            return info;
+        }
+        return null;
     }
 
     @Override
     public Map<Device, DeviceInfo> getDevicesByUserId(UUID userId) {
-        Online result = template.opsForValue().get(userId.toString());
-        if (result == null) {
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        Map<Device, DeviceInfo> devices = op.entries();
+        if (devices == null) {
             return null;
         }
 
         // 过滤 status 不是 connected 的 device
-        Map<Device, DeviceInfo> devices = result.getDevices();
-        Iterator<Map.Entry<Device, DeviceInfo>> iterator = devices.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Device, DeviceInfo> entry = iterator.next();
-            if (!entry.getValue().isConnect()) {
-                iterator.remove();
-                iterator.next();
-            }
-        }
-        return devices;
+        devices.entrySet().removeIf(entry -> !entry.getValue().isConnect());
+        return devices.size() > 0 ? devices : null;
     }
 }

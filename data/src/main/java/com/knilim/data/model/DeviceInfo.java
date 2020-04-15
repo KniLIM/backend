@@ -1,10 +1,10 @@
 package com.knilim.data.model;
 
-import com.knilim.data.utils.ConnectStatus;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DeviceInfo {
+public class DeviceInfo implements Serializable {
 
     // 验证 token
     private String token;
@@ -15,13 +15,18 @@ public class DeviceInfo {
     // 连接的 session server 的端口
     private Integer sessionServerPort;
 
-    private ConnectStatus status;
+    // true => connect false => login
+    private boolean connect;
 
-    public DeviceInfo(String token, String sessionServerIp, Integer sessionServerPort) {
+    public DeviceInfo(String token, String sessionServerIp, Integer sessionServerPort, boolean connect) {
         this.token = token;
         this.sessionServerIp = sessionServerIp;
         this.sessionServerPort = sessionServerPort;
-        this.status = ConnectStatus.S_LOGIN;
+        this.connect = connect;
+    }
+
+    public DeviceInfo(String token, String sessionServerIp, Integer sessionServerPort) {
+        this(token, sessionServerIp, sessionServerPort, false);
     }
 
     public String getToken() {
@@ -37,18 +42,19 @@ public class DeviceInfo {
     }
 
     public boolean isConnect() {
-        return this.status == ConnectStatus.S_CONNECT;
+        return connect;
     }
 
-    public void connect() {
-        this.status = ConnectStatus.S_CONNECT;
+    public void connectToSession() {
+        connect = true;
     }
 
     @Override
     public String toString() {
         return "DeviceInfo{" + "token='" + token + '\'' +
                 ", sessionServerIp='" + sessionServerIp + '\'' +
-                ", sessionServerPort=" + sessionServerPort + '}';
+                ", sessionServerPort=" + sessionServerPort + '\'' +
+                ", connect=" + connect + '}';
     }
 
     @Override
@@ -59,6 +65,6 @@ public class DeviceInfo {
         return Objects.equals(token, that.token) &&
                 Objects.equals(sessionServerIp, that.sessionServerIp) &&
                 Objects.equals(sessionServerPort, that.sessionServerPort) &&
-                status == that.status;
+                connect == that.connect;
     }
 }
