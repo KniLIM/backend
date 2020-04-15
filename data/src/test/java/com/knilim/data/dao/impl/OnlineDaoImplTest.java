@@ -7,13 +7,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -26,12 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 class OnlineDaoImplTest {
 
-    @Resource
     private OnlineDao dao;
 
-    @Resource
-    @Qualifier("globalOnlineRedisTemplate")
-    private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
+    private RedisTemplate<String, HashMap<Device, DeviceInfo>> onlineTemplate;
 
     private String token1 = "hello world";
     private String token2 = "redis tests";
@@ -40,17 +35,23 @@ class OnlineDaoImplTest {
     private Integer port1= 8888;
     private Integer port2 = 8000;
 
+    @Autowired
+    public OnlineDaoImplTest(OnlineDao dao, RedisTemplate<String, HashMap<Device, DeviceInfo>> onlineTemplate) {
+        this.dao = dao;
+        this.onlineTemplate = onlineTemplate;
+    }
+
     @AfterEach
     void cleanDataSource() {
-        Set<String> keys = template.keys("*");
+        Set<String> keys = onlineTemplate.keys("*");
         if (keys != null) {
-            template.delete(keys);
+            onlineTemplate.delete(keys);
         }
     }
 
     @Test
-    void connectGlobalRedis() {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(UUID.randomUUID().toString());
+    void connectOnlineRedis() {
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(UUID.randomUUID().toString());
         op.put(Device.D_PC, new DeviceInfo("hello world", "localhost", 80));
         DeviceInfo info =  op.get(Device.D_PC);
 
@@ -63,7 +64,7 @@ class OnlineDaoImplTest {
     @Test
     void addOnlineDevice() {
         UUID userId = UUID.randomUUID();
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(userId.toString());
 
         // 加入第一个设备
         dao.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
@@ -85,7 +86,7 @@ class OnlineDaoImplTest {
     @Test
     void removeOnlineDevice() {
         UUID userId = UUID.randomUUID();
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(userId.toString());
 
         dao.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
         DeviceInfo info1 = op.get(Device.D_WEB);

@@ -3,40 +3,39 @@ package com.knilim.data.dao.impl;
 import com.knilim.data.dao.OnlineDao;
 import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.utils.Device;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
 @Component
 public class OnlineDaoImpl implements OnlineDao {
 
-    @Resource
-    @Qualifier("globalOnlineRedisTemplate")
-    private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
+    private RedisTemplate<String, HashMap<Device, DeviceInfo>> onlineTemplate;
+
+    @Autowired
+    public OnlineDaoImpl(RedisTemplate<String, HashMap<Device, DeviceInfo>> onlineTemplate) {
+        this.onlineTemplate = onlineTemplate;
+    }
 
     @Override
     public void addOnlineDevice(UUID userId, Device device, String token,
                                 String ip, Integer port) {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
-        op.put(device, new DeviceInfo(token, ip, port));
+        onlineTemplate.boundHashOps(userId.toString()).put(device, new DeviceInfo(token, ip, port));
     }
 
     @Override
     public void removeOnlineDevice(UUID userId, Device device) {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
-        op.delete(device);
+        onlineTemplate.boundHashOps(userId.toString()).delete(device);
     }
 
     @Override
     public boolean checkToken(UUID userId, Device device, String token) {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(userId.toString());
         DeviceInfo info = op.get(device);
 
         if (info == null) {
@@ -54,7 +53,7 @@ public class OnlineDaoImpl implements OnlineDao {
 
     @Override
     public DeviceInfo getDevice(UUID userId, Device device) {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(userId.toString());
         DeviceInfo info = op.get(device);
 
         if (info != null && info.isConnect()) {
@@ -65,7 +64,7 @@ public class OnlineDaoImpl implements OnlineDao {
 
     @Override
     public Map<Device, DeviceInfo> getDevicesByUserId(UUID userId) {
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = onlineTemplate.boundHashOps(userId.toString());
         Map<Device, DeviceInfo> devices = op.entries();
         if (devices == null) {
             return null;

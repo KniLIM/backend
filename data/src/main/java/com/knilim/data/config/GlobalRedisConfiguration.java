@@ -4,10 +4,10 @@ import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.utils.Device;
 import com.knilim.data.utils.FastJsonSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
@@ -16,42 +16,69 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import javax.annotation.Priority;
 import java.util.HashMap;
 
 @Configuration
 public class GlobalRedisConfiguration {
 
-    @Bean("globalOnlineRedisPoolConfig")
+    @Bean("globalRedisPoolConfig")
     @ConfigurationProperties(prefix = "spring.redis.lettuce.pool")
-    public GenericObjectPoolConfig genericObjectPoolConfig() {
+    public GenericObjectPoolConfig poolConfig() {
         return new GenericObjectPoolConfig();
     }
 
-    @Bean("globalOnlineRedisConfiguration")
+    @Bean("onlineRedisConfig")
     @ConfigurationProperties(prefix = "spring.redis")
-    public RedisStandaloneConfiguration globalRedisConfiguration() {
+    public RedisStandaloneConfiguration onlineRedisConfig() {
         return new RedisStandaloneConfiguration();
     }
 
-    @Bean("globalOnlineRedisConnectionFactory")
-    public LettuceConnectionFactory globalRedisFactory(
-            @Qualifier("globalOnlineRedisPoolConfig") GenericObjectPoolConfig poolConfig,
-            @Qualifier("globalOnlineRedisConfiguration") RedisStandaloneConfiguration redisConfig) {
-        LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
-                .poolConfig(poolConfig).build();
-        return new LettuceConnectionFactory(redisConfig, clientConfiguration);
+    @Bean("offlineRedisConfig")
+    @ConfigurationProperties(prefix = "spring.redis3")
+    public RedisStandaloneConfiguration offlineRedisConfig() {
+        return new RedisStandaloneConfiguration();
     }
 
-    @Bean("globalOnlineRedisTemplate")
-    public RedisTemplate<String, HashMap<Device, DeviceInfo>> localConnectRedisTemplate(
-            @Qualifier("globalOnlineRedisConnectionFactory") RedisConnectionFactory factory) {
+    @Bean("onlineRedisFactory")
+    @Primary
+    public LettuceConnectionFactory onlineRedisFactory(
+            GenericObjectPoolConfig globalRedisPoolConfig, RedisStandaloneConfiguration onlineRedisConfig) {
+        LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
+                .poolConfig(globalRedisPoolConfig).build();
+        return new LettuceConnectionFactory(onlineRedisConfig, clientConfiguration);
+    }
+
+    @Bean("offlineRedisFactory")
+    public LettuceConnectionFactory offlineRedisFactory(
+            GenericObjectPoolConfig globalRedisPoolConfig, RedisStandaloneConfiguration offlineRedisConfig) {
+        LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
+                .poolConfig(globalRedisPoolConfig).build();
+        return new LettuceConnectionFactory(offlineRedisConfig, clientConfiguration);
+    }
+
+    @Bean("onlineTemplate")
+    public RedisTemplate<String, HashMap<Device, DeviceInfo>> onlineTemplate(RedisConnectionFactory onlineRedisFactory) {
         RedisTemplate<String, HashMap<Device, DeviceInfo>> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
+        template.setConnectionFactory(onlineRedisFactory);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new FastJsonSerializer<>(DeviceInfo.class));
         template.setHashKeySerializer(new FastJsonSerializer<>(Device.class));
         template.setHashValueSerializer(new FastJsonSerializer<>(DeviceInfo.class));
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean("offlineTemplate")
+    public RedisTemplate<String, Byte[]> offlineTemplate(RedisConnectionFactory offlineRedisFactory) {
+        RedisTemplate<String, Byte[]> template = new RedisTemplate<>();
+        template.setConnectionFactory(offlineRedisFactory);
+
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new FastJsonSerializer<>(Byte[].class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new FastJsonSerializer<>(Byte[].class));
         template.afterPropertiesSet();
         return template;
     }
