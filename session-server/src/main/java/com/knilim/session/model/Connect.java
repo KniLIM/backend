@@ -1,6 +1,6 @@
 package com.knilim.session.model;
 
-import com.knilim.data.utils.Device;
+import com.knilim.model.utils.Device;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;

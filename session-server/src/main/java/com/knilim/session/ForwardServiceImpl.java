@@ -3,7 +3,7 @@ package com.knilim.session;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.knilim.service.ForwardService;
-import com.knilim.data.utils.Tuple;
+import com.knilim.model.utils.Tuple;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

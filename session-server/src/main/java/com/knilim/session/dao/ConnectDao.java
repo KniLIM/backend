@@ -1,7 +1,7 @@
 package com.knilim.session.dao;
 
 import com.knilim.session.model.Connect;
-import com.knilim.data.utils.Device;
+import com.knilim.model.utils.Device;
 
 import java.util.UUID;
 

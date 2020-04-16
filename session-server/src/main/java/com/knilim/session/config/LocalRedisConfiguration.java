@@ -1,6 +1,6 @@
 package com.knilim.session.config;
 
-import com.knilim.data.utils.FastJsonSerializer;
+import com.knilim.model.utils.FastJsonSerializer;
 import com.knilim.session.model.Client;
 import com.knilim.session.model.Connect;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;

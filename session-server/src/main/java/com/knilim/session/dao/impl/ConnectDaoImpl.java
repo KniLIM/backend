@@ -2,7 +2,7 @@ package com.knilim.session.dao.impl;
 
 import com.knilim.session.dao.ConnectDao;
 import com.knilim.session.model.Connect;
-import com.knilim.data.utils.Device;
+import com.knilim.model.utils.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
