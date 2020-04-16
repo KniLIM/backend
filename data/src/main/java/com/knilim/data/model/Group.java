@@ -2,10 +2,11 @@ package com.knilim.data.model;
 
 import org.springframework.data.annotation.Id;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-public class Group {
+public class Group implements Serializable {
     @Id
     private UUID id;
 

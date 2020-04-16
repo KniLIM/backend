@@ -1,11 +1,12 @@
 package com.knilim.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import com.knilim.data.model.Group;
+import com.knilim.data.model.User;
 
 /**
- *  群组服务接口
+ *  群组服务RPC接口
  */
 public interface GroupService {
     /**
@@ -36,7 +37,21 @@ public interface GroupService {
      * }</pre></p>
      *
      */
-    ArrayList<Group> getGroupsByUserId(UUID userId);
+    List<Group> getGroupsByUserId(UUID userId);
+
+    /**
+     * 根据群的id返回该群的所有用户列表（进行适当冗余）
+     * @param groupId 需要获取用户列表的群id
+     * @return 一个User对象的列表，包括该群的所有用户
+     *          结果进行适当冗余，每个User里包含的信息只有userId、memo、avatar
+     *
+     * e.g.
+     * <p><pre>{
+     *      UUID groupOId = UUID.randomUUID();
+     *      ArrayList<User> res = getMembersByGroupId(groupId);
+     * }</pre></p>
+     */
+    List<User> getMembersByGroupId(UUID groupId);
 
     /**
      * 根据groupId得到所有群成员，然后查找在线数据库，将离线的用户和在线的用户分为两个列表。
@@ -56,5 +71,5 @@ public interface GroupService {
      * }</pre></p>
      *
      */
-    ArrayList<UUID> sendGroupMsg(UUID groupId, Byte[] msg);
+    List<UUID> sendGroupMsg(UUID groupId, Byte[] msg);
 }

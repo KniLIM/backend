@@ -1,9 +1,10 @@
 package com.knilim.data.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-public class GroupRelationship {
+public class GroupRelationship implements Serializable {
 
     private UUID gid;
 
