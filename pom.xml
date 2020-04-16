@@ -9,7 +9,6 @@
         <module>account-service</module>
         <module>group-service</module>
         <module>relationship-service</module>
-        <module>data</module>
         <module>push-service</module>
         <module>offline-service</module>
         <module>online-service</module>
