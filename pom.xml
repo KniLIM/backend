@@ -11,6 +11,8 @@
         <module>relationship-service</module>
         <module>data</module>
         <module>push-service</module>
+        <module>offline-service</module>
+        <module>online-service</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
