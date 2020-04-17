@@ -2,8 +2,6 @@ package com.knilim.online;
 
 import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.utils.Device;
-import com.knilim.service.OnlineService;
-import org.apache.dubbo.config.annotation.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 class OnlineServiceImplTest {
 
-    @Reference
-    private OnlineService service;
+    @Resource
+    private OnlineServiceImpl service;
 
     @Resource
     private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;

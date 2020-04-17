@@ -12,13 +12,12 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-//@Component
+@Component
 @Service
 public class OnlineServiceImpl implements OnlineService {
 
     @Resource
     private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
-
 
     @Override
     public void addOnlineDevice(String userId, Device device, String token,

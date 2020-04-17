@@ -9,7 +9,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 @Service
 public class OfflineServiceImpl implements OfflineService {
 

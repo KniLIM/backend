@@ -1,8 +1,6 @@
 package com.knilim.offline;
 
 import com.knilim.data.utils.BytesUtil;
-import com.knilim.service.OfflineService;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,12 +19,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@DisplayName("Test Offline Dao")
+@DisplayName("Test OfflineServiceImpl")
 @ExtendWith(SpringExtension.class)
 class OfflineServiceImplTest {
 
-    @Reference
-    private OfflineService service;
+    @Resource
+    private OfflineServiceImpl service;
 
     private final String msg1 = "hello world";
     private final String msg2 = "redis tests";
