@@ -25,21 +25,22 @@ public class ClientDaoImpl implements ClientDao {
 
     @Override
     public HashMap<Device, Connect> getConnectsByUserId(String userId) {
-        return null;
+        return template.boundValueOps(userId).get();
     }
 
     @Override
     public Connect getConnect(String userId, Device device) {
-        return null;
+        return template.boundValueOps(userId).get().get(device);
     }
 
     @Override
     public void addConnect(String userId, Device device, String sessionId, String host, Integer port, String key) {
-
+        template.boundHashOps(userId).put(device,new Connect(sessionId, host, port, key));
     }
 
     @Override
     public void removeConnect(String userId, Device device) {
+        template.boundValueOps(userId).get().remove(device);
 
     }
 }
