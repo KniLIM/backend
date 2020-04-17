@@ -19,7 +19,6 @@ public class OnlineServiceImpl implements OnlineService {
     @Resource
     private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
 
-
     @Override
     public void addOnlineDevice(String userId, Device device, String token,
                                 String ip, Integer port) {

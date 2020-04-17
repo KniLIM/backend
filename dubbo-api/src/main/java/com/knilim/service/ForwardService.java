@@ -1,25 +1,12 @@
 package com.knilim.service;
 
+import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Tuple;
 
 import java.util.UUID;
 
 /**
  * 转发服务接口
- * 通过依赖注入生成实例 forwardService
- *
- * e.g.
- * <p><pre>{@code
- *     class Handler {
- *         \@Reference
- *         ForwardService forwardService;
- *
- *         public void foo() {
- *             forwardService.getAvailableSession();
- *         }
- *     }
- * }</pre></p>
- *
  */
 public interface ForwardService {
 
@@ -57,5 +44,7 @@ public interface ForwardService {
      * }</pre></p>
      *
      */
-    void forward(UUID rcvId, Byte[] data);
+    void forward(String rcvId, Byte[] data);
+
+    void publish(String rcvId, Notification notification);
 }
