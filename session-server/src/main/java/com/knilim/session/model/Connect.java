@@ -1,19 +1,10 @@
 package com.knilim.session.model;
 
-import com.knilim.model.utils.Device;
-import org.springframework.data.annotation.Id;
-
 import java.io.Serializable;
-import java.util.UUID;
 
 public final class Connect implements Serializable {
 
-    @Id
-    private UUID sessionId;
-
-    private UUID userId;
-
-    private Device device;
+    private String sessionId;
 
     private String host;
 
@@ -21,26 +12,34 @@ public final class Connect implements Serializable {
 
     private String key;
 
-    public Connect(UUID sessionId, UUID userId, Device device, String host, Integer port, String key) {
+
+    public Connect(String sessionId, String host, Integer port, String key) {
         this.sessionId = sessionId;
-        this.userId = userId;
-        this.device = device;
         this.host = host;
         this.port = port;
         this.key = key;
     }
 
-    public UUID getSessionId() {
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionId() {
         return sessionId;
     }
 
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public Device getDevice() {
-        return device;
-    }
 
     public String getHost() {
         return host;
@@ -52,5 +51,15 @@ public final class Connect implements Serializable {
 
     public String getKey() {
         return key;
+    }
+
+    @Override
+    public String toString() {
+        return "Connect{" +
+                "sessionId='" + sessionId + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", key='" + key + '\'' +
+                '}';
     }
 }

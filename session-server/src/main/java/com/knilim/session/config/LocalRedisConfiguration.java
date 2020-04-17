@@ -1,7 +1,8 @@
 package com.knilim.session.config;
 
-import com.knilim.model.utils.FastJsonSerializer;
+import com.knilim.data.utils.Device;
 import com.knilim.session.model.Client;
+import com.knilim.data.utils.FastJsonSerializer;
 import com.knilim.session.model.Connect;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,69 +17,43 @@ import org.springframework.data.redis.connection.lettuce.LettucePoolingClientCon
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.HashMap;
+
 @Configuration
 public class LocalRedisConfiguration {
 
     @Bean("localRedisPoolConfig")
-    @ConfigurationProperties(prefix = "spring.redis1.lettuce.pool")
+    @ConfigurationProperties(prefix = "spring.redis.lettuce.pool")
     public GenericObjectPoolConfig genericObjectPoolConfig() {
         return new GenericObjectPoolConfig();
     }
 
-    @Bean("localConnectRedisConfiguration")
-    @ConfigurationProperties(prefix = "spring.redis1")
-    public RedisStandaloneConfiguration localConnectRedisConfiguration() {
+    @Bean("localRedisConfiguration")
+    @ConfigurationProperties(prefix = "spring.redis")
+    public RedisStandaloneConfiguration localRedisConfiguration() {
         return new RedisStandaloneConfiguration();
     }
 
-    @Bean("localClientRedisConfiguration")
-    @ConfigurationProperties(prefix = "spring.redis2")
-    public RedisStandaloneConfiguration localClientRedisConfiguration() {
-        return new RedisStandaloneConfiguration();
-    }
-
-    @Bean("localConnectRedisFactory")
-    public LettuceConnectionFactory localConnectRedisFactory(
+    @Bean("localRedisFactory")
+    public LettuceConnectionFactory localRedisFactory(
             @Qualifier("localRedisPoolConfig") GenericObjectPoolConfig poolConfig,
-            @Qualifier("localConnectRedisConfiguration") RedisStandaloneConfiguration redisConfig) {
+            RedisStandaloneConfiguration redisConfig) {
         LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
                 .poolConfig(poolConfig).build();
         return new LettuceConnectionFactory(redisConfig, clientConfiguration);
     }
 
-    @Bean("localClientRedisFactory")
-    public LettuceConnectionFactory localClientRedisFactory(
-            @Qualifier("localRedisPoolConfig") GenericObjectPoolConfig poolConfig,
-            @Qualifier("localClientRedisConfiguration") RedisStandaloneConfiguration redisConfig) {
-        LettuceClientConfiguration clientConfiguration = LettucePoolingClientConfiguration.builder()
-                .poolConfig(poolConfig).build();
-        return new LettuceConnectionFactory(redisConfig, clientConfiguration);
-    }
 
-    @Bean("localConnectRedisTemplate")
-    public RedisTemplate<String, Connect> localConnectRedisTemplate(
-            @Qualifier("localConnectRedisFactory") RedisConnectionFactory factory) {
-        RedisTemplate<String, Connect> template = new RedisTemplate<>();
+    @Bean("localClientRedisTemplate")
+    public RedisTemplate<String, HashMap<Device, Connect>> localClientRedisTemplate(
+            @Qualifier("localRedisFactory") RedisConnectionFactory factory) {
+        RedisTemplate<String, HashMap<Device,Connect>> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new FastJsonSerializer<>(Connect.class));
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new FastJsonSerializer<>(Connect.class));
-        template.afterPropertiesSet();
-        return template;
-    }
-
-    @Bean("localClientRedisTemplate")
-    public RedisTemplate<String, Client> localClientRedisTemplate(
-            @Qualifier("localClientRedisFactory") RedisConnectionFactory factory) {
-        RedisTemplate<String, Client> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new FastJsonSerializer<>(Client.class));
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new FastJsonSerializer<>(Client.class));
         template.afterPropertiesSet();
         return template;
     }
