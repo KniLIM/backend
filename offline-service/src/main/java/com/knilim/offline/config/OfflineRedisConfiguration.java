@@ -11,7 +11,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class OfflineRedisConfiguration {
 
     @Bean
-    public RedisTemplate<String, Byte[]> offlineTemplate(RedisConnectionFactory factory) {
+    public RedisTemplate<String, Byte[]> template(RedisConnectionFactory factory) {
         RedisTemplate<String, Byte[]> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 

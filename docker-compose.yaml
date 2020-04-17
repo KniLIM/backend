@@ -1,16 +1,16 @@
 version: "3.7"
 
 services:
-  com.knilim.data.offline:
+  com.knilim.offline.redis:
     image: redis:latest
-    container_name: com.knilim.data.offline
+    container_name: com.knilim.offline
     command: redis-server --requirepass 123456
     ports:
       - "6378:6379"
 
-  com.knilim.data.online:
+  com.knilim.online.redis:
     image: redis:latest
-    container_name: com.knilim.data.online
+    container_name: com.knilim.online
     command: redis-server --requirepass 123456
     ports:
       - "6379:6379"

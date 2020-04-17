@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-//@Component
+@Component
 @Service
 public class OnlineServiceImpl implements OnlineService {
 
