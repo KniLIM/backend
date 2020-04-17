@@ -2,7 +2,7 @@ package com.knilim.service;
 
 import java.util.ArrayList;
 import java.util.UUID;
-import com.knilim.model.model.Group;
+import com.knilim.data.model.Group;
 
 /**
  *  群组服务接口

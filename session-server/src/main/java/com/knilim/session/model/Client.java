@@ -1,42 +1,58 @@
 package com.knilim.session.model;
 
+import com.knilim.data.utils.Device;
 import org.springframework.data.annotation.Id;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.HashMap;
+
 
 public class Client implements Serializable {
 
     @Id
-    private UUID userId;
+    private String userId;
 
-    private List<UUID> clients;
+    private HashMap<Device,Connect> connectHashMap;
 
-    public Client(UUID userId) {
+
+    public Client(String userId) {
         this.userId = userId;
-        this.clients = new ArrayList<>();
+        this.connectHashMap = new HashMap<Device,Connect>();
     }
 
-    public UUID getUserId() {
+    public Client(String userId, HashMap<Device,Connect> connectHashMap) {
+        this.userId = userId;
+        this.connectHashMap = connectHashMap;
+    }
+
+    public String getUserId() {
         return userId;
     }
 
-    public List<UUID> getClients() {
-        return clients;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public void addClient(UUID sessionId) {
-        this.clients.add(sessionId);
+    public HashMap<Device, Connect> getConnectHashMap() {
+        return connectHashMap;
     }
 
-    public void removeClient(UUID sessionId) {
-        this.clients.remove(sessionId);
+    public void setConnectHashMap(HashMap<Device, Connect> connectHashMap) {
+        this.connectHashMap = connectHashMap;
+    }
+
+    public void addConnect(Device device,String sessionId, String host, Integer port, String key) {
+        this.connectHashMap.put(device,new Connect(sessionId, host, port, key));
+    }
+
+    public void removeConnect(Device device) {
+        this.connectHashMap.remove(device);
     }
 
     @Override
     public String toString() {
-        return "Client{userId=" + userId + ", clients=" + clients + '}';
+        return "Client{" +
+                "userId='" + userId + '\'' +
+                ", connectHashMap=" + connectHashMap +
+                '}';
     }
 }
