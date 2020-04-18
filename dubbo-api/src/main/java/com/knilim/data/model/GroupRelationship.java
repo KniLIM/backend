@@ -16,6 +16,12 @@ public class GroupRelationship implements Serializable {
 
     private Timestamp createdAt;
 
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public GroupRelationship(){}
+
     public String getGid() {
         return gid;
     }

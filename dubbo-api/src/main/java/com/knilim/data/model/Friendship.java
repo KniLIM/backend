@@ -17,6 +17,12 @@ public class Friendship implements Serializable {
 
     private Timestamp createdAt;
 
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public Friendship(){}
+
     public Friendship(String uid, String friend, String nickname) {
         this.uid = uid;
         this.friend = friend;

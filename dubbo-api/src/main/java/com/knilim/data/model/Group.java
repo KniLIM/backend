@@ -20,6 +20,12 @@ public class Group implements Serializable {
 
     private Timestamp createdAt;
 
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public Group(){}
+
     Group(String owner, String name){
         this.owner = owner;
         this.name = name;
