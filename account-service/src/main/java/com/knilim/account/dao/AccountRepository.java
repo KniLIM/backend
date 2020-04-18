@@ -19,10 +19,12 @@ public interface AccountRepository {
 
     /**
      * 修改密码
-     * @param user
+     * @param id
+     * @param oldPassword
+     * @param newPassword
      * @return
      */
-    boolean updatePassword(User user, String password) ;
+    boolean changePassword(String id,String oldPassword, String newPassword) ;
 
     /**
      * 根据id返回用户信息
@@ -37,4 +39,11 @@ public interface AccountRepository {
      * @return
      */
     User searchByKeyword(String keyword) ;
+
+    /**
+     * 邮箱或电话是否被占用
+     * @param keyword
+     * @return
+     */
+    boolean exsists(String keyword) ;
 }
