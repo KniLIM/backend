@@ -3,7 +3,11 @@ package com.knilim.group.utils;
 public enum Error {
     NoUserId("no userId"),
     NoGroupName("no group name"),
-    InsertFailed("Insert Failed");
+    InsertFailed("insert failed"),
+    NoGroupId("no groupId"),
+    DeleteFailed("delete failed"),
+    GetInfoFailed("get info failed"),
+    UpdateFailed("update failed");
 
     String msg;
 

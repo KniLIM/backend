@@ -26,7 +26,7 @@ public class Group implements Serializable {
      */
     public Group(){}
 
-    Group(String owner, String name){
+    public Group(String owner, String name){
         this.owner = owner;
         this.name = name;
         this.id = UUID.randomUUID().toString();
