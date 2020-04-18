@@ -3,7 +3,6 @@ package com.knilim.service;
 import com.knilim.data.model.Friendship;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 public interface RelationshipService {
     /**
@@ -14,10 +13,10 @@ public interface RelationshipService {
      *
      * e.g.
      * <p><pre>{@code
-     *      UUID userId = UUID.randomUUID();
-     *      ArrayList<Friendship> res = getPersonalFriendList(userId);
+     *      String userId;
+     *      ArrayList<Friendship> res = getFriendsByUserId(userId);
      * }</pre></p>
      *
      */
-    ArrayList<Friendship> getPersonalFriendList(UUID userId);
+    ArrayList<Friendship> getFriendsByUserId(String userId);
 }

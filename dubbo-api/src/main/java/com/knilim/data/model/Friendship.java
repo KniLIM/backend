@@ -2,41 +2,40 @@ package com.knilim.data.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.UUID;
 
 public class Friendship implements Serializable {
 
-    private UUID uid;
+    private String uid;
 
-    private UUID friend;
+    private String friend;
 
     private String nickname;
 
-    private Boolean is_top;
+    private Boolean isTop;
 
-    private Boolean is_black;
+    private Boolean isBlack;
 
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
-    public Friendship(UUID uid, UUID friend, String nickname) {
+    public Friendship(String uid, String friend, String nickname) {
         this.uid = uid;
         this.friend = friend;
         this.nickname = nickname;
     }
 
-    public UUID getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(UUID uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 
-    public UUID getFriend() {
+    public String getFriend() {
         return friend;
     }
 
-    public void setFriend(UUID friend) {
+    public void setFriend(String friend) {
         this.friend = friend;
     }
 
@@ -48,27 +47,27 @@ public class Friendship implements Serializable {
         this.nickname = nickname;
     }
 
-    public Boolean getIs_top() {
-        return is_top;
+    public Boolean getIsTop() {
+        return isTop;
     }
 
-    public void setIs_top(Boolean is_top) {
-        this.is_top = is_top;
+    public void setIsTop(Boolean isTop) {
+        this.isTop = isTop;
     }
 
-    public Boolean getIs_black() {
-        return is_black;
+    public Boolean getIsBlack() {
+        return isBlack;
     }
 
-    public void setIs_black(Boolean is_black) {
-        this.is_black = is_black;
+    public void setIsBlack(Boolean isBlack) {
+        this.isBlack = isBlack;
     }
 
-    public Timestamp getCreated_at() {
-        return created_at;
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(Timestamp created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
