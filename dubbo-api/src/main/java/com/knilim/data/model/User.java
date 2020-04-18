@@ -87,6 +87,13 @@ public class User implements Serializable {
         this.sex = sex;
     }
 
+    /**
+     * 为了之前代码的兼容性
+     */
+    public boolean isSex() {
+        return sex;
+    }
+
     public String getSignature() {
         return signature;
     }

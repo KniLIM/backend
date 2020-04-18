@@ -12,7 +12,7 @@ public class GroupRelationship implements Serializable {
 
     private String memo;  // nickname
 
-    private boolean isBlock;
+    private Boolean isBlock;
 
     private Timestamp createdAt;
 
@@ -42,6 +42,14 @@ public class GroupRelationship implements Serializable {
 
     public boolean is_block() {
         return isBlock;
+    }
+
+    public Boolean getBlock() {
+        return isBlock;
+    }
+
+    public void setBlock(Boolean block) {
+        isBlock = block;
     }
 
     public void setIs_block(boolean is_block) {
