@@ -69,7 +69,7 @@ public class AccountController {
 
 enum Error {
     NoEmail("no email"), NoPassword("no password"), NoPhone("no phone"), NoNickName("no nickName"), CanNotInsert("新建账户失败,请检查email与phone是否重复"),
-    NoAccount("missing email or phone"), NoSuchAccount("no such account");
+    NoAccount("missing email or phone"), NoSuchAccount("no such account"),
     RedundantEmail("this email is already occupied"), RedundantPhone("phone is already occupied"), CanNotUpdate("更新账户信息失败,请检查email与phone是否重复"),
     CanNotChange("旧密码输入错误");
 
