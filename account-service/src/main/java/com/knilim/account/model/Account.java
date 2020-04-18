@@ -7,20 +7,20 @@ public class Account implements Serializable{
     private String phone;
     private String passWord;
     private String nickName;
-    private String avator;
+    private String avatar;
     private boolean sex;
     private String signature;
     private String location;
     private String birthday;
     private String createdAt;
 
-    public Account(String id, String email, String phone, String passWord, String nickName, String avator, boolean sex, String signature, String location, String birthday, String createdAt) {
+    public Account(String id, String email, String phone, String passWord, String nickName, String avatar, boolean sex, String signature, String location, String birthday, String createdAt) {
         this.id = id;
         this.email = email;
         this.phone = phone;
         this.passWord = passWord;
         this.nickName = nickName;
-        this.avator = avator;
+        this.avatar = avatar;
         this.sex = sex;
         this.signature = signature;
         this.location = location;
@@ -68,12 +68,12 @@ public class Account implements Serializable{
         this.nickName = nickName;
     }
 
-    public String getAvator() {
-        return avator;
+    public String getAvatar() {
+        return avatar;
     }
 
-    public void setAvator(String avator) {
-        this.avator = avator;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public boolean isSex() {
@@ -124,7 +124,7 @@ public class Account implements Serializable{
                 ", phone='" + phone + '\'' +
                 ", passWord='" + passWord + '\'' +
                 ", nickName='" + nickName + '\'' +
-                ", avator='" + avator + '\'' +
+                ", avatar='" + avatar + '\'' +
                 ", sex=" + sex +
                 ", signature='" + signature + '\'' +
                 ", location='" + location + '\'' +
