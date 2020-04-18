@@ -20,6 +20,8 @@ public class Group implements Serializable {
 
     private Timestamp createdAt;
 
+    Group(){}
+
     Group(String owner, String name){
         this.owner = owner;
         this.name = name;
