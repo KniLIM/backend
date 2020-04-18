@@ -1,15 +1,13 @@
 package com.knilim.account.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.annotations.JsonAdapter;
 import com.knilim.account.dao.AccountRepository;
 import com.knilim.account.util.Response;
 import com.knilim.data.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
@@ -35,6 +33,7 @@ public class AccountController {
         else return Util.signSuccess(id);
     }
 
+
     @PostMapping("/account/login")
     public Response login(@RequestBody String json) {
         JSONObject jsonObject = JSONObject.parseObject(json);
@@ -46,6 +45,24 @@ public class AccountController {
         // todo 验证登录信息, 选取合适的session server, 写入中心在线数据库
         return null;
     }
+  
+    @PatchMapping("/account/{id}")
+    public Response modify(@PathVariable(value="id") String id,@RequestBody String json) {
+        User user = JSONObject.parseObject(json, User.class);
+        user.setId(id);
+        if(accountRepository.exsists(user.getEmail())) return Util.modifyError(Error.RedundantEmail);
+        if(accountRepository.exsists(user.getPhone())) return Util.modifyError(Error.RedundantPhone);
+
+        if(!accountRepository.updateUserInformation(user)) return Util.modifyError(Error.CanNotUpdate);
+        return Util.modifySuccess(id);
+    }
+
+    @PutMapping("/account/{id}/changepassword")
+    public Response change(@PathVariable(value="id") String id,@RequestBody String json) {
+        JSONObject obj = JSON.parseObject(json);
+        if(!accountRepository.changePassword(id,obj.getString("oldPassword"),obj.getString("newPassword"))) return Util.modifyError(Error.CanNotChange);
+        return Util.modifySuccess(id);
+    }
 
 
 }
@@ -53,6 +70,9 @@ public class AccountController {
 enum Error {
     NoEmail("no email"), NoPassword("no password"), NoPhone("no phone"), NoNickName("no nickName"), CanNotInsert("新建账户失败,请检查email与phone是否重复"),
     NoAccount("missing email or phone"), NoSuchAccount("no such account");
+    RedundantEmail("this email is already occupied"), RedundantPhone("phone is already occupied"), CanNotUpdate("更新账户信息失败,请检查email与phone是否重复"),
+    CanNotChange("旧密码输入错误");
+
     Error(String msg){
         this.msg = msg;
     }
@@ -71,6 +91,12 @@ class Util {
         return signUPError(error);
     }
     static Response signSuccess(String id) {
+        return new Response(true, "user_id", id);
+    }
+    static Response modifyError(Error error) {
+        return new Response(false, "msg", error.getMsg());
+    }
+    static Response modifySuccess(String id) {
         return new Response(true, "user_id", id);
     }
 }
