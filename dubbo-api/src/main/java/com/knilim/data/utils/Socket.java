@@ -3,11 +3,16 @@ package com.knilim.data.utils;
 public class Socket {
 
     private String ip;
-    private String port;
+    private int port;
 
-    public Socket(String ip, String port) {
+    public Socket(String ip, int port) {
         this.ip = ip;
         this.port = port;
+    }
+
+    public Socket(Tuple<String,Integer> socket) {
+        this.ip = socket.getFirst();
+        this.port = socket.getSecond();
     }
 
     public String getIp() {
@@ -18,11 +23,11 @@ public class Socket {
         this.ip = ip;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
