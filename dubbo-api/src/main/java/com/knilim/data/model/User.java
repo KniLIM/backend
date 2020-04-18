@@ -15,6 +15,10 @@ public class User implements Serializable {
     private String birthday;
     private String createdAt;
 
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
     public User(){}
 
     public User(String id, String email, String phone, String passWord, String nickName, String avatar, boolean sex, String signature, String location, String birthday, String createdAt) {
@@ -85,6 +89,13 @@ public class User implements Serializable {
 
     public void setSex(Boolean sex) {
         this.sex = sex;
+    }
+
+    /**
+     * 为了之前代码的兼容性
+     */
+    public boolean isSex() {
+        return sex;
     }
 
     public String getSignature() {
