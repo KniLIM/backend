@@ -29,6 +29,26 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
+    public User getUserByEmail(String email) {
+        String sql = String.format("select * from user where email = '%s'", email);
+        return queryForSingleUser(sql);
+    }
+
+    @Override
+    public User getUserByPhone(String phone) {
+        String sql = String.format("select * from user where phone = '%s'", phone);
+        return queryForSingleUser(sql);
+    }
+
+    private User queryForSingleUser(String sql) {
+        RowMapper<User> userRowMapper = new BeanPropertyRowMapper<>(User.class);
+        try {
+            return jdbcTemplate.queryForObject(sql, userRowMapper);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+  
     public boolean updateUserInformation(User user) {
         String sql = String.format("update IM.user set email='%s', phone='%s', nickname='%s', avator='%s', sex='%b', " +
                 "signature='%s', location='%s', birthday='%s' where id='%s'", user.getEmail(), user.getPhone(), user.getNickName(),

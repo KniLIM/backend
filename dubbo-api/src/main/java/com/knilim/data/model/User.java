@@ -9,11 +9,13 @@ public class User implements Serializable {
     private String passWord;
     private String nickName;
     private String avatar;
-    private boolean sex;
+    private Boolean sex;
     private String signature;
     private String location;
     private String birthday;
     private String createdAt;
+
+    public User(){}
 
     public User(String id, String email, String phone, String passWord, String nickName, String avatar, boolean sex, String signature, String location, String birthday, String createdAt) {
         this.id = id;
@@ -77,11 +79,11 @@ public class User implements Serializable {
         this.avatar = avatar;
     }
 
-    public boolean isSex() {
+    public Boolean getSex() {
         return sex;
     }
 
-    public void setSex(boolean sex) {
+    public void setSex(Boolean sex) {
         this.sex = sex;
     }
 
