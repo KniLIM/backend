@@ -6,31 +6,35 @@ import java.util.UUID;
 
 public class GroupRelationship implements Serializable {
 
-    private UUID gid;
+    private String gid;
 
-    private UUID uid;
+    private String uid;
 
     private String memo;  // nickname
 
-    private boolean is_admin;
+    private Boolean isBlock;
 
-    private boolean is_block;
+    private Timestamp createdAt;
 
-    private Timestamp created_at;
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public GroupRelationship(){}
 
-    public UUID getGid() {
+    public String getGid() {
         return gid;
     }
 
-    public void setGid(UUID gid) {
+    public void setGid(String gid) {
         this.gid = gid;
     }
 
-    public UUID getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(UUID uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 
@@ -42,27 +46,27 @@ public class GroupRelationship implements Serializable {
         this.memo = memo;
     }
 
-    public boolean is_admin() {
-        return is_admin;
-    }
-
-    public void setIs_admin(boolean is_admin) {
-        this.is_admin = is_admin;
-    }
-
     public boolean is_block() {
-        return is_block;
+        return isBlock;
+    }
+
+    public Boolean getBlock() {
+        return isBlock;
+    }
+
+    public void setBlock(Boolean block) {
+        isBlock = block;
     }
 
     public void setIs_block(boolean is_block) {
-        this.is_block = is_block;
+        this.isBlock = is_block;
     }
 
     public Timestamp getCreated_at() {
-        return created_at;
+        return createdAt;
     }
 
     public void setCreated_at(Timestamp created_at) {
-        this.created_at = created_at;
+        this.createdAt = created_at;
     }
 }

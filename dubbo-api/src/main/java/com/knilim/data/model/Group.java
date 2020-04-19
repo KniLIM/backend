@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class Group implements Serializable {
 
-    private UUID id;
+    private String id;
 
-    private UUID owner;
+    private String owner;
 
     private String name;
 
@@ -18,27 +18,33 @@ public class Group implements Serializable {
 
     private String announcement;
 
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
-    Group(UUID owner, String name){
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public Group(){}
+
+    public Group(String owner, String name){
         this.owner = owner;
         this.name = name;
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public UUID getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(UUID owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
@@ -75,10 +81,10 @@ public class Group implements Serializable {
     }
 
     public Timestamp getCreated_at() {
-        return created_at;
+        return createdAt;
     }
 
     public void setCreated_at(Timestamp created_at) {
-        this.created_at = created_at;
+        this.createdAt = created_at;
     }
 }

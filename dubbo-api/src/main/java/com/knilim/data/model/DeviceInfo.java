@@ -16,7 +16,13 @@ public class DeviceInfo implements Serializable {
     private Integer sessionServerPort;
 
     // true => connect false => login
-    private boolean connect;
+    private Boolean connect;
+
+    /**
+     * 这个构造方法不要删!!!有用的!
+     * @autor loheagn
+     */
+    public DeviceInfo(){}
 
     public DeviceInfo(String token, String sessionServerIp, Integer sessionServerPort, boolean connect) {
         this.token = token;
@@ -42,6 +48,14 @@ public class DeviceInfo implements Serializable {
     }
 
     public boolean isConnect() {
+        return connect;
+    }
+
+    public void setConnect(Boolean connect) {
+        this.connect = connect;
+    }
+
+    public Boolean getConnect() {
         return connect;
     }
 

@@ -1,12 +1,14 @@
 package com.knilim.service;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.List;
 import com.knilim.data.model.Group;
+import com.knilim.data.model.User;
+import com.knilim.data.utils.Tuple;
 
 /**
  *  群组服务接口
  */
+
 public interface GroupService {
     /**
      *
@@ -16,12 +18,12 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      UUID groupId = UUID.randomUUID();
+     *      String groupId = UUID.randomUUID().toString();
      *      Group groupMsg = getGroupByGroupId(groupId);
      * }</pre></p>
      *
      */
-    Group getGroupByGroupId(UUID groupId);
+    Group getGroupByGroupId(String groupId);
 
     /**
      * 根据用户的user_id，返回该用户所在的群列表（进行适当冗余）
@@ -31,12 +33,12 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      UUID userId = UUID.randomUUID();
+     *      String userId = UUID.randomUUID().toString();
      *      ArrayList<Group> res = getGroupsByUserId(userId);
      * }</pre></p>
      *
      */
-    ArrayList<Group> getGroupsByUserId(UUID userId);
+    List<Group> getGroupsByUserId(String userId);
 
     /**
      * 根据groupId得到所有群成员，然后查找在线数据库，将离线的用户和在线的用户分为两个列表。
@@ -50,11 +52,25 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      UUID groupId = UUID.randomUUID();
+     *      String groupId = UUID.randomUUID().toString();
      *      Byte[] msg = {};
-     *      ArrayList<UUID> onlineUser = sendGroupMsg(groupId, msg);
+     *      ArrayList<String> onlineUser = sendGroupMsg(groupId, msg);
      * }</pre></p>
      *
      */
-    ArrayList<UUID> sendGroupMsg(UUID groupId, Byte[] msg);
+    List<String> sendGroupMsg(String groupId, Byte[] msg);
+
+    /**
+     * 根据userId得到该用户所有的群列表，然后根据这些群id得到所有群的成员，并一起返回，结果进行适当冗余。
+     * @param userId 需要获取群列表的userId
+     * @return  一个Tuple的List，first是群组对象，second是一个User的List
+     *
+     * e.g.
+     * <p><pre>{@code
+     *      String userId = UUID.randomUUID().toString();
+     *      ArrayList<Tuple<Group, ArrayList<User>>> res = getGroupsAndMembersByUserId(String userId);
+     * }
+     *
+     */
+    List<Tuple<Group, List<User>>> getGroupsAndMembersByUserId(String userId);
 }
