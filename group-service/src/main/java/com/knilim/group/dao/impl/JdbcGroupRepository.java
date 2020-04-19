@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Repository
 public class JdbcGroupRepository implements GroupRepository {
     private JdbcTemplate jdbcTemplate;
@@ -47,7 +50,7 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public Group update(String groupId, String name, String avatar, String signature, String announcement)
-            throws DataAccessException{
+            throws DataAccessException {
         // 首先修改群信息
         String plugin = "";
         if (name != null) plugin += String.format(", name = '%s'", name);
@@ -56,7 +59,7 @@ public class JdbcGroupRepository implements GroupRepository {
         if (announcement != null) plugin += String.format(", announcement = '%s'", announcement);
         plugin = plugin.substring(1);
         String sql1 = String.format("update table IM.group set %s where id = '%s'", plugin, groupId);
-        if(jdbcTemplate.update(sql1) != 1) return null;
+        if (jdbcTemplate.update(sql1) != 1) return null;
         // 获取该群最新的所有信息
         try {
             String sql2 = String.format("select * from IM.group where id = '%s'", groupId);
@@ -64,5 +67,49 @@ public class JdbcGroupRepository implements GroupRepository {
         } catch (DataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public List<Group> getGroupsByUserId(String userId) throws DataAccessException {
+        // 首先根据群组关系表得到该用户所有群的id
+        String sql1 = String.format("select gid from IM.groupship where uid = '%s'", userId);
+        try {
+            List<String> gids = jdbcTemplate.query(sql1, new BeanPropertyRowMapper<>(String.class));
+            //然后根据所有群id，在群组表里获得这些群组的对象并返回
+            return jdbcTemplate.query(
+                    "select * from IM.group where id = ?",
+                    gids.toArray(),
+                    (rs, rowNum) ->
+                            new Group(
+                                    rs.getString("id"),
+                                    rs.getString("owner"),
+                                    rs.getString("name"),
+                                    rs.getString("avatar"),
+                                    rs.getString("signature"),
+                                    rs.getString("announcement"),
+                                    rs.getTimestamp("createdAt")
+                            )
+            );
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<Group> getGroupsByKeyword(String Keyword){
+        return jdbcTemplate.query(
+                "select * from IM.group where owner like ? or name like ? or signature like ?",
+                new Object[] {"%" + Keyword + "%","%" + Keyword + "%","%" + Keyword + "%"},
+                (rs, rowNum) ->
+                        new Group(
+                                rs.getString("id"),
+                                rs.getString("owner"),
+                                rs.getString("name"),
+                                rs.getString("avatar"),
+                                rs.getString("signature"),
+                                rs.getString("announcement"),
+                                rs.getTimestamp("createdAt")
+                        )
+        );
     }
 }

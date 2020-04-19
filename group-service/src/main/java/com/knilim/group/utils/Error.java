@@ -7,7 +7,9 @@ public enum Error {
     NoGroupId("no groupId"),
     DeleteFailed("delete failed"),
     GetInfoFailed("get info failed"),
-    UpdateFailed("update failed");
+    UpdateFailed("update failed"),
+    GetGroupListByUserIdFailed("get group list by userId failed"),
+    GetGroupListByKeywordFailed("get group list by keyword failed");
 
     String msg;
 

@@ -22,14 +22,19 @@ public class Group implements Serializable {
 
     /**
      * 这个构造方法不要删!!!有用的!
-     * @autor loheagn
+     * @author loheagn
      */
     public Group(){}
 
-    public Group(String owner, String name){
+    public Group(String id, String owner, String name, String avatar,
+                 String signature, String announcement, Timestamp createdAt) {
+        this.id = id;
         this.owner = owner;
         this.name = name;
-        this.id = UUID.randomUUID().toString();
+        this.avatar = avatar;
+        this.signature = signature;
+        this.announcement = announcement;
+        this.createdAt = createdAt;
     }
 
     public String getId() {
