@@ -12,10 +12,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.util.HashMap;
 
 @Configuration
-public class LocalRedisConfiguration {
+public class ConnectRedisConfiguration {
 
-    @Bean("localClientRedisTemplate")
-    public RedisTemplate<String, HashMap<Device, Connect>> localClientRedisTemplate(RedisConnectionFactory factory) {
+    @Bean
+    public RedisTemplate<String, HashMap<Device, Connect>> template(RedisConnectionFactory factory) {
         RedisTemplate<String, HashMap<Device,Connect>> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 

@@ -1,6 +1,7 @@
 syntax = "proto3";
+
 option java_package = "com.knilim.session.data";
-option java_outer_classname = "Msg";
+option java_outer_classname = "MsgProto";
 
 message Msg {
     enum MsgType {
@@ -9,5 +10,8 @@ message Msg {
     }
 
     MsgType msgType = 1;
-    string receiver = 2;
+    string sender   = 2;
+    string receiver = 3;
+    string device   = 4;
+    bytes content   = 5;
 }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ForwardServiceImpl implements ForwardService {
 
-
     private SocketIONamespace nps;
 
     @Autowired

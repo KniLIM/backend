@@ -27,7 +27,7 @@ public class ConnectHandler {
 
     @Autowired
     public ConnectHandler(SocketIOServer server) {
-        this.nps = server.addNamespace("/sockets");
+        this.nps = server.getNamespace("/sockets");
         nps.addConnectListener(onConnect());
         nps.addDisconnectListener(onDisConnect());
     }

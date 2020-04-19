@@ -3,23 +3,19 @@ package com.knilim.session.dao.impl;
 import com.knilim.data.utils.Device;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.model.Connect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class ClientDaoImpl implements ClientDao {
 
+    @Resource
     private RedisTemplate<String,HashMap<Device,Connect>> template;
-
-    @Autowired
-    public ClientDaoImpl(RedisTemplate<String, HashMap<Device,Connect>> template) {
-        this.template = template;
-    }
 
     @Override
     public Map<Device, Connect> getConnectsByUserId(String userId) {
