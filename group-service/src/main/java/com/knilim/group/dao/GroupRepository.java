@@ -2,6 +2,8 @@ package com.knilim.group.dao;
 
 import com.knilim.data.model.Group;
 
+import java.util.List;
+
 public interface GroupRepository {
 
     /**
@@ -35,4 +37,18 @@ public interface GroupRepository {
      * @return 一个Group对象，包含该group最新的所有信息
      */
     Group update(String groupId, String name, String avatar, String signature, String announcement);
+
+    /**
+     * 根据用户id返回群列表
+     * @param userId 用户id
+     * @return 该用户的群列表
+     */
+    List<Group> getGroupsByUserId(String userId) ;
+
+    /**
+     * 根据关键词返回群列表
+     * @param Keyword 关键词
+     * @return 符和关键词的群列表
+     */
+    List<Group> getGroupsByKeyword(String Keyword);
 }

@@ -18,7 +18,7 @@ public class GroupRelationship implements Serializable {
 
     /**
      * 这个构造方法不要删!!!有用的!
-     * @autor loheagn
+     * @author loheagn
      */
     public GroupRelationship(){}
 
