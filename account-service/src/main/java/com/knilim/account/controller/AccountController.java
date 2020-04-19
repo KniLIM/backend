@@ -6,6 +6,12 @@ import com.google.gson.annotations.JsonAdapter;
 import com.knilim.account.dao.AccountRepository;
 import com.knilim.account.util.Response;
 import com.knilim.data.model.User;
+import com.knilim.data.utils.Device;
+import com.knilim.data.utils.DeviceUtil;
+import com.knilim.data.utils.Tuple;
+import com.knilim.service.ForwardService;
+import com.knilim.service.OnlineService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
@@ -13,6 +19,12 @@ import java.util.UUID;
 @RestController
 public class AccountController {
     private AccountRepository accountRepository;
+
+    @Reference
+    private OnlineService onlineService;
+
+    @Reference
+    private ForwardService forwardService;
 
     @Autowired
     public void setAccountRepository(AccountRepository accountRepository) {
@@ -39,10 +51,19 @@ public class AccountController {
         JSONObject jsonObject = JSONObject.parseObject(json);
         String account = jsonObject.getString("account");
         String password = jsonObject.getString("password");
+        String device = jsonObject.getString("device");
         if(account == null) return Util.loginError(Error.NoAccount);
         if(password == null) return Util.loginError(Error.NoPassword);
 
-        // todo 验证登录信息, 选取合适的session server, 写入中心在线数据库
+        // todo 验证登录信息, 选取合适的session server, 写入中心在线数据库 楠哥看看这里是否满足要求
+        if(!accountRepository.checkPassword(account,password)) return Util.loginError(Error.PasswordError);
+        User user;
+        if(account.contains("@")) user = accountRepository.getUserByEmail(account);
+        else user = accountRepository.getUserByPhone(account);
+        String userId = user.getId();
+        Tuple<String,Integer> ipPort = forwardService.getAvailableSession();
+        String token = UUID.randomUUID().toString();
+        onlineService.addOnlineDevice(userId, DeviceUtil.fromString(device),token,ipPort.getFirst(),ipPort.getSecond());
         return null;
     }
   
@@ -71,8 +92,7 @@ enum Error {
     NoEmail("no email"), NoPassword("no password"), NoPhone("no phone"), NoNickName("no nickName"), CanNotInsert("新建账户失败,请检查email与phone是否重复"),
     NoAccount("missing email or phone"), NoSuchAccount("no such account"),
     RedundantEmail("this email is already occupied"), RedundantPhone("phone is already occupied"), CanNotUpdate("更新账户信息失败,请检查email与phone是否重复"),
-    CanNotChange("旧密码输入错误");
-
+    CanNotChange("旧密码输入错误"),PasswordError("账号或密码输入错误");
     Error(String msg){
         this.msg = msg;
     }
