@@ -53,7 +53,4 @@ public interface ClientDao {
      * @param device 删除的 {@code Device}
      */
     void removeConnect(String userId,Device device);
-
-
-
 }
