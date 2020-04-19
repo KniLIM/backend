@@ -3,7 +3,7 @@ package com.knilim.session.dao;
 import com.knilim.data.utils.Device;
 import com.knilim.session.model.Connect;
 
-import java.util.HashMap;
+import java.util.Map;
 
 
 public interface ClientDao {
@@ -14,7 +14,7 @@ public interface ClientDao {
      * @param userId 查找的用户
      * @return 用户对应的 {@code Connect} hashmap
      */
-    HashMap<Device, Connect> getConnectsByUserId(String userId);
+    Map<Device, Connect> getConnectsByUserId(String userId);
 
     /**
      * 根据 {@code userId}与{@code device} 返回 {@link Connect} 对象
@@ -25,6 +25,14 @@ public interface ClientDao {
      */
     Connect getConnect(String userId,Device device);
 
+    /**
+     * 根据 {@code userId}与{@code device} 返回用户加密密钥
+     *
+     * @param userId 查找的用户
+     * @param device 查找的设备
+     * @return 对应的 {@code key} 对象
+     */
+    String getKey(String userId, Device device);
 
     /**
      * 向 {@code userId} 的 clients 表里添加一个新的 设备 {@code Connect}

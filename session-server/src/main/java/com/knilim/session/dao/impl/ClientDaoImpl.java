@@ -4,14 +4,12 @@ import com.knilim.data.utils.Device;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.model.Connect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 @Component
 public class ClientDaoImpl implements ClientDao {
@@ -24,13 +22,23 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public HashMap<Device, Connect> getConnectsByUserId(String userId) {
-        return template.boundValueOps(userId).get();
+    public Map<Device, Connect> getConnectsByUserId(String userId) {
+        BoundHashOperations<String, Device, Connect> op = template.boundHashOps(userId);
+        Map<Device, Connect> map = op.entries();
+        return (map!=null&& map.size() > 0)? map:null;
     }
 
     @Override
     public Connect getConnect(String userId, Device device) {
-        return template.boundValueOps(userId).get().get(device);
+        return (Connect) template.boundHashOps(userId).get(device);
+    }
+
+    @Override
+    public String getKey(String userId, Device device) {
+        Connect connect = getConnect(userId, device);
+        if (connect !=null)
+            return connect.getKey();
+        return null;
     }
 
     @Override
@@ -40,7 +48,7 @@ public class ClientDaoImpl implements ClientDao {
 
     @Override
     public void removeConnect(String userId, Device device) {
-        template.boundValueOps(userId).get().remove(device);
-
+        template.boundHashOps(userId).delete(device);
     }
+
 }
