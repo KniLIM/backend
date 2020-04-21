@@ -1,11 +1,11 @@
 package com.knilim.group.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import com.knilim.data.model.Group;
 import com.knilim.group.dao.GroupRepository;
 import com.knilim.group.utils.Error;
 import com.knilim.group.utils.Response;
+import com.knilim.data.model.UserTmp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,5 +85,63 @@ public class GroupController {
                     new Response(false, "error_msg", Error.GetGroupListByKeywordFailed.getMsg());
         }
     }
-}
 
+    @GetMapping("/group/{id}/member")
+    public Response getMembers(@PathVariable(value = "id") String id) {
+        List<UserTmp> users = groupRepository.getMembers(id);
+        return users != null ?
+                new Response(true, "result", users) :
+                new Response(false, "error_msg", Error.GetMembersFailed.getMsg());
+    }
+
+    @PostMapping("/group/{id}/participation")
+    public Response createApplication(@PathVariable(value = "id") String groupId,
+                                      @RequestBody String json) {
+        JSONObject params = JSONObject.parseObject(json);
+        String userId = params.getString("user_id");
+        String comment = params.getString("comment");
+        return groupRepository.participation(groupId, userId, comment) ?
+                new Response(true, "result", null) :
+                new Response(false, "error_msg", Error.CreateApplicationFailed.getMsg());
+    }
+
+    @PatchMapping("/group/{id}/participation")
+    public Response handleApplication(@PathVariable(value = "id") String groupId,
+                                      @RequestBody String json) {
+        JSONObject params = JSONObject.parseObject(json);
+        String userId = params.getString("user_id");
+        String state = params.getString("state");
+        return groupRepository.handleParticipation(groupId, userId, state) ?
+                new Response(true, "result", null) :
+                new Response(false, "error_msg", Error.HandleApplicationFailed.getMsg());
+    }
+
+    @PostMapping("/group/{id}/exit")
+    public Response exitGroup(@PathVariable(value = "id") String groupId,
+                              @RequestBody String json) {
+        String userId = JSONObject.parseObject(json).getString("user_id");
+        return groupRepository.exit(groupId, userId) ?
+                new Response(true, "result", null) :
+                new Response(false, "error_msg", Error.ExitGroupFailed.getMsg());
+    }
+
+    @PostMapping("/group/{id}/expel?params")
+    public Response expelGroup(@PathVariable(value = "id") String groupId,
+                               @RequestBody String json) {
+        String userId = JSONObject.parseObject(json).getString("user_id");
+        return groupRepository.expel(groupId, userId) ?
+                new Response(true, "result", null) :
+                new Response(false, "error_msg", Error.ExpelGroupFailed.getMsg());
+    }
+
+    @PostMapping("/group/{id}/nickname")
+    public Response changeNickname(@PathVariable(value = "id") String groupId,
+                                   @RequestBody String json) {
+        JSONObject params = JSONObject.parseObject(json);
+        String userId = params.getString("user_id");
+        String newNickname = params.getString("new_nickname");
+        return groupRepository.memo(groupId, userId, newNickname) ?
+                new Response(true, "result", null) :
+                new Response(false, "error_msg", Error.ChangeNicknameFailed.getMsg());
+    }
+}

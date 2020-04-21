@@ -16,11 +16,17 @@ public class GroupRelationship implements Serializable {
 
     private Timestamp createdAt;
 
+    private String userAvatar;
+
+    private Boolean isAdmin;
+
     /**
      * 这个构造方法不要删!!!有用的!
+     *
      * @author loheagn
      */
-    public GroupRelationship(){}
+    public GroupRelationship() {
+    }
 
     public String getGid() {
         return gid;
@@ -46,10 +52,6 @@ public class GroupRelationship implements Serializable {
         this.memo = memo;
     }
 
-    public boolean is_block() {
-        return isBlock;
-    }
-
     public Boolean getBlock() {
         return isBlock;
     }
@@ -58,15 +60,27 @@ public class GroupRelationship implements Serializable {
         isBlock = block;
     }
 
-    public void setIs_block(boolean is_block) {
-        this.isBlock = is_block;
-    }
-
-    public Timestamp getCreated_at() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreated_at(Timestamp created_at) {
-        this.createdAt = created_at;
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 }

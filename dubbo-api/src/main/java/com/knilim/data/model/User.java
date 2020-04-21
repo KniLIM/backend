@@ -35,6 +35,12 @@ public class User implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public User(String id, String nickName, String avatar) {
+        this.id = id;
+        this.nickName = nickName;
+        this.avatar = avatar;
+    }
+
     public String getId() {
         return id;
     }
