@@ -2,13 +2,13 @@ package com.knilim.group.dao.impl;
 
 import com.knilim.data.model.Group;
 import com.knilim.group.dao.GroupRepository;
+import com.knilim.data.model.UserTmp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -28,12 +28,13 @@ public class JdbcGroupRepository implements GroupRepository {
                 group.getId(), group.getOwner(), group.getName(), group.getAvatar(), group.getSignature());
         // 群组关系表添加关系
         String sql2 = String.format("insert into IM.groupship" +
-                "(uid, gid, ) values ('%s, '%s')", group.getOwner(), group.getId());
+                "(uid, gid, is_admin) values ('%s', '%s', '%d')", group.getOwner(), group.getId(), 1);
         return jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1;
     }
 
     @Override
     public boolean delete(String groupId) {
+        // TODO 向该群所有成员发送推送通知
         String sql = String.format("delete from IM.group where id = '%s'", groupId);
         return jdbcTemplate.update(sql) == 1;
     }
@@ -58,7 +59,7 @@ public class JdbcGroupRepository implements GroupRepository {
         if (signature != null) plugin += String.format(", signature = '%s'", signature);
         if (announcement != null) plugin += String.format(", announcement = '%s'", announcement);
         plugin = plugin.substring(1);
-        String sql1 = String.format("update table IM.group set %s where id = '%s'", plugin, groupId);
+        String sql1 = String.format("update IM.group set %s where id = '%s'", plugin, groupId);
         if (jdbcTemplate.update(sql1) != 1) return null;
         // 获取该群最新的所有信息
         try {
@@ -96,10 +97,10 @@ public class JdbcGroupRepository implements GroupRepository {
     }
 
     @Override
-    public List<Group> getGroupsByKeyword(String Keyword){
+    public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
                 "select * from IM.group where owner like ? or name like ? or signature like ?",
-                new Object[] {"%" + Keyword + "%","%" + Keyword + "%","%" + Keyword + "%"},
+                new Object[]{"%" + Keyword + "%", "%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
                                 rs.getString("id"),
@@ -108,8 +109,74 @@ public class JdbcGroupRepository implements GroupRepository {
                                 rs.getString("avatar"),
                                 rs.getString("signature"),
                                 rs.getString("announcement"),
-                                rs.getTimestamp("createdAt")
+                                rs.getTimestamp("created_at")
                         )
         );
+    }
+
+    @Override
+    public List<UserTmp> getMembers(String groupId) {
+        // 直接联表查询groupship表和user表即可
+        return jdbcTemplate.query(
+                "select * from IM.groupship, IM.user where uid = id and gid = ?",
+                new Object[]{groupId},
+                (rs, rowNum) ->
+                        new UserTmp(
+                                rs.getString("id"),
+                                rs.getString("nickname"),
+                                rs.getString("avator"),
+                                rs.getString("memo"),
+                                rs.getBoolean("is_admin")
+                        )
+        );
+    }
+
+    @Override
+    public boolean participation(String groupId, String userId, String comment) {
+        // 首先在群组表获得群主id
+        String owner = jdbcTemplate.queryForObject(
+                "select owner from IM.group where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(String.class)
+        );
+        // TODO 创建群组申请 及 向群主发送消息推送
+
+        return false;
+    }
+
+    @Override
+    public boolean handleParticipation(String groupId, String userId, String state) {
+        // TODO 修改申请表状态 以及根据state不同发送不同的推送通知
+        if (state.equals("yes")) {
+            return true;
+        } else if (state.equals("no")) {
+            return true;
+        } else
+            return false;
+    }
+
+    @Override
+    public boolean exit(String groupId, String userId) {
+        // TODO 向群主发送推送消息
+
+        return jdbcTemplate.update(
+                "delete from IM.group where gid = ? and uid = ?",
+                groupId, userId) == 1;
+    }
+
+    @Override
+    public boolean expel(String groupId, String userId) {
+        // TODO 向该群成员发送推送消息
+
+        return jdbcTemplate.update(
+                "delete from IM.group where gid = ? and uid = ?",
+                groupId, userId) == 1;
+    }
+
+    @Override
+    public boolean memo(String groupId, String userId, String newNickname) {
+        return jdbcTemplate.update(
+                "update IM.group set memo = ? where gid = ? and uid = ?",
+                newNickname, groupId, userId) == 1;
     }
 }
