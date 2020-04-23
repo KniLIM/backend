@@ -1,9 +1,9 @@
 package com.knilim.push;
 
+import com.alibaba.fastjson.JSON;
 import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
-import com.knilim.service.ForwardService;
 import com.knilim.service.OnlineService;
 import com.knilim.service.PushService;
 import org.apache.dubbo.config.annotation.Reference;
@@ -11,6 +11,7 @@ import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -21,9 +22,6 @@ public class PushServiceImpl implements PushService {
 
     @Resource
     private RedisTemplate<String, Notification> template;
-
-    @Reference
-    private ForwardService forwardService;
 
     @Reference
     private OnlineService onlineService;
@@ -37,16 +35,22 @@ public class PushServiceImpl implements PushService {
             template.boundListOps(userId).rightPush(notification);
         } else {
             Set<String> endpoints = new HashSet<>();
+            RestTemplate template = new RestTemplate();
 
-            for (DeviceInfo device: devices.values()) {
-                String endpoint = String.format("%s:%d", device.getSessionServerIp(),
-                        device.getSessionServerPort());
+            devices.values().forEach(device -> {
+                String ip = device.getSessionServerIp();
+                Integer port = device.getSessionServerPort();
+                String endpoint = String.format("http://%s:%d/publish", ip, port);
+
                 if (!endpoints.contains(endpoint)) {
                     endpoints.add(endpoint);
-                    // TODO: 指定 ip:port 发送
-                    forwardService.publish(userId, notification);
+
+                    Map<String, String> requestBody = new HashMap<>();
+                    requestBody.put("userId", userId);
+                    requestBody.put("notification", JSON.toJSONString(notification));
+                    template.postForObject(endpoint, requestBody, Void.class);
                 }
-            }
+            });
         }
     }
 

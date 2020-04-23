@@ -28,23 +28,4 @@ public interface ForwardService {
      *
      */
     Tuple<String, Integer> getAvailableSession();
-
-    /**
-     * 将数据字节流 {@code data} 转发给 userId 为 {@code rcvId} 的用户
-     *
-     * @param rcvId 接受消息的用户对应的 userId
-     * @param data 转发的数据字节流
-     *
-     * e.g.
-     * <p><pre>{@code
-     *     UUID rcv = getUser();
-     *     Byte[] data = getData();
-     *
-     *     forwardService.forward(rcv, data);
-     * }</pre></p>
-     *
-     */
-    void forward(String rcvId, Byte[] data);
-
-    void publish(String rcvId, Notification notification);
 }

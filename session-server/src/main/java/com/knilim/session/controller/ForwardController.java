@@ -1,8 +1,10 @@
 package com.knilim.session.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
+import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
@@ -45,21 +47,35 @@ public class ForwardController {
 
             Map<Device, Connect> connects = dao.getConnectsByUserId(rcvId);
             if (connects != null) {
-                for (Map.Entry<Device, Connect> entry : connects.entrySet()) {
-                    String key = dao.getKey(rcvId, entry.getKey());
+                connects.forEach((device, connect) -> {
+                    String key = dao.getKey(rcvId, device);
                     byte[] encrypted = AESEncryptor.encrypt(data, key);
-                    UUID sessionId = UUID.fromString(entry.getValue().getSessionId());
+                    UUID sessionId = UUID.fromString(connect.getSessionId());
                     nps.getClient(sessionId).sendEvent("rcv-msg", encrypted);
-                }
+                });
             }
         } catch (Exception e) {
-            logger.error("Error request body");
+            logger.error("Error request body in /forward");
         }
     }
 
     @PostMapping("/publish")
     public void publish(@RequestBody String body) {
+        try {
+            JSONObject object = JSONObject.parseObject(body);
+            String userId = object.getString("userId");
+            Notification notification = JSONObject.parseObject(
+                    object.getString("notification"), Notification.class);
 
+            Map<Device, Connect> connects = dao.getConnectsByUserId(userId);
+            if (connects != null) {
+                connects.forEach((device, connect) -> {
+                    // TODO: 确定 notification 如何交互
+                });
+            }
+        } catch (Exception e) {
+            logger.error("Error request body in /publish");
+        }
     }
 
 //    @GetMapping("/test")
