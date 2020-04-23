@@ -61,4 +61,12 @@ public interface AccountRepository {
      */
     boolean exsists(String keyword) ;
 
+    /**
+     * 检查密码
+     * @param account
+     * @param password
+     * @return
+     */
+    boolean checkPassword(String account, String password);
+
 }

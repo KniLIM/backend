@@ -58,7 +58,7 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public boolean changePassword(String id, String oldPassword, String newPassword) {
-        String vSql = String.format("select password from IM.user where password = '%s'",oldPassword);
+        String vSql = String.format("select password from IM.user where id = '%s'",id);
         String getPassword = jdbcTemplate.queryForObject(vSql,String.class);
         if(!getPassword.equals(oldPassword)) return false;
         String sql = String.format("update IM.user set password='%s' where id='%s'",newPassword, id);
@@ -97,5 +97,12 @@ public class JdbcAccountRepository implements AccountRepository {
             user = null;
         }
         return user != null;
+    }
+
+    @Override
+    public boolean checkPassword(String account, String password) {
+        String sql = String.format("Select password from IM.user where account = '%s' or email = '%s'",account,account);
+        String getPassword = jdbcTemplate.queryForObject(sql,String.class);
+        return password.equals(getPassword);
     }
 }

@@ -19,7 +19,7 @@ public class Friendship implements Serializable {
 
     /**
      * 这个构造方法不要删!!!有用的!
-     * @autor loheagn
+     * @author loheagn
      */
     public Friendship(){}
 
@@ -27,6 +27,15 @@ public class Friendship implements Serializable {
         this.uid = uid;
         this.friend = friend;
         this.nickname = nickname;
+    }
+
+    public Friendship(String uid, String friend, String nickname, Boolean isTop, Boolean isBlack, Timestamp createdAt) {
+        this.uid = uid;
+        this.friend = friend;
+        this.nickname = nickname;
+        this.isTop = isTop;
+        this.isBlack = isBlack;
+        this.createdAt = createdAt;
     }
 
     public String getUid() {

@@ -2,7 +2,7 @@ package com.knilim.service;
 
 import java.util.List;
 import com.knilim.data.model.Group;
-import com.knilim.data.model.User;
+import com.knilim.data.model.UserTmp;
 import com.knilim.data.utils.Tuple;
 
 /**
@@ -41,6 +41,18 @@ public interface GroupService {
     List<Group> getGroupsByUserId(String userId);
 
     /**
+     * 根据群的id返回该群的所有用户列表（进行适当冗余）
+     * @param groupId 群id
+     * @return 一个临时的用于返回的UserTmp模型的list
+     * e.g.
+     * <p><pre>{@code
+     *      String groupId = UUID.randomUUID().toString();
+     *      ArrayList<UserTmp> res =  getMembersByGroupId(groupId);
+     * }</pre></p>
+     */
+    List<UserTmp> getMembersByGroupId(String groupId);
+
+    /**
      * 根据groupId得到所有群成员，然后查找在线数据库，将离线的用户和在线的用户分为两个列表。
      * 对于离线的用户，操作离线消息数据库对它们进行消息的离线存储。
      * 然后对于在线的用户，将在线用户的列表返回给session server进行消息的转发处理。
@@ -72,5 +84,5 @@ public interface GroupService {
      * }
      *
      */
-    List<Tuple<Group, List<User>>> getGroupsAndMembersByUserId(String userId);
+    List<Tuple<Group, List<UserTmp>>> getGroupsAndMembersByUserId(String userId);
 }
