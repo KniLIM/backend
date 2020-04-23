@@ -59,7 +59,7 @@ class OnlineServiceImplTest {
     @Test
     void addOnlineDevice() {
         String userId = UUID.randomUUID().toString();
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
 
         // 加入第一个设备
         service.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
@@ -81,7 +81,7 @@ class OnlineServiceImplTest {
     @Test
     void removeOnlineDevice() {
         String userId = UUID.randomUUID().toString();
-        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId.toString());
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
 
         service.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
         DeviceInfo info1 = op.get(Device.D_WEB);
@@ -98,7 +98,33 @@ class OnlineServiceImplTest {
         service.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
         assertFalse(service.checkToken(userId, Device.D_WEB, token2));
         assertTrue(service.checkToken(userId, Device.D_WEB, token1));
-        assertFalse(service.checkToken(userId, Device.D_WEB, token1));
+        assertTrue(service.checkToken(userId, Device.D_WEB, token1));
+    }
+
+    @Test
+    void connect() {
+        String userId = UUID.randomUUID().toString();
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
+
+        service.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
+        DeviceInfo info = op.get(Device.D_WEB);
+        assertNotNull(info);
+        assertFalse(info.isConnect());
+
+        assertTrue(service.connect(userId, Device.D_WEB));
+        assertFalse(service.connect(userId, Device.D_WEB));
+        info = op.get(Device.D_WEB);
+        assertNotNull(info);
+        assertTrue(info.isConnect());
+
+        assertTrue(service.disconnect(userId, Device.D_WEB));
+        assertFalse(service.disconnect(userId, Device.D_WEB));
+        info = op.get(Device.D_WEB);
+        assertNotNull(info);
+        assertFalse(info.isConnect());
+
+        assertFalse(service.connect(userId, Device.D_PC));
+        assertFalse(service.disconnect(userId, Device.D_PC));
     }
 
     @Test
@@ -107,7 +133,7 @@ class OnlineServiceImplTest {
 
         service.addOnlineDevice(userId, Device.D_WEB, token1, ip1, port1);
         assertNull(service.getDevice(userId, Device.D_WEB));
-        service.checkToken(userId, Device.D_WEB, token1);
+        service.connect(userId, Device.D_WEB);
         assertNotNull(service.getDevice(userId, Device.D_WEB));
     }
 
@@ -120,12 +146,15 @@ class OnlineServiceImplTest {
         service.addOnlineDevice(userId, Device.D_PC, token2, ip2, port2);
         assertNull(service.getDevicesByUserId(userId));
 
-        service.checkToken(userId, Device.D_WEB, token1);
+        service.connect(userId, Device.D_WEB);
         assertEquals(service.getDevicesByUserId(userId).size(), 1);
         assertEquals(service.getDevicesByUserId(userId).get(Device.D_WEB).getToken(), token1);
 
-        service.checkToken(userId, Device.D_PC, token2);
+        service.connect(userId, Device.D_PC);
         assertEquals(service.getDevicesByUserId(userId).size(), 2);
         assertEquals(service.getDevicesByUserId(userId).get(Device.D_PC).getToken(), token2);
+
+        service.disconnect(userId, Device.D_WEB);
+        assertEquals(service.getDevicesByUserId(userId).size(), 1);
     }
 }

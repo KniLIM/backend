@@ -39,8 +39,38 @@ public class OnlineServiceImpl implements OnlineService {
             return false;
         }
 
-        if (!info.isConnect() && info.getToken().equals(token)) {
+        return !info.isConnect() && info.getToken().equals(token);
+    }
+
+    @Override
+    public boolean connect(String userId, Device device) {
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
+        DeviceInfo info = op.get(device);
+
+        if (info == null) {
+            return false;
+        }
+
+        if (!info.isConnect()) {
             info.connectToSession();
+            op.put(device, info);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean disconnect(String userId, Device device) {
+        BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
+        DeviceInfo info = op.get(device);
+
+        if (info == null) {
+            return false;
+        }
+
+        if (info.isConnect()) {
+            info.disconnectToSession();
             op.put(device, info);
             return true;
         }

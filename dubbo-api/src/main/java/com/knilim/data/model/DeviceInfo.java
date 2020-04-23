@@ -22,7 +22,7 @@ public class DeviceInfo implements Serializable {
      * 这个构造方法不要删!!!有用的!
      * @autor loheagn
      */
-    public DeviceInfo(){}
+    public DeviceInfo() {}
 
     public DeviceInfo(String token, String sessionServerIp, Integer sessionServerPort, boolean connect) {
         this.token = token;
@@ -39,15 +39,31 @@ public class DeviceInfo implements Serializable {
         return token;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public String getSessionServerIp() {
         return sessionServerIp;
+    }
+
+    public void setSessionServerIp(String sessionServerIp) {
+        this.sessionServerIp = sessionServerIp;
     }
 
     public Integer getSessionServerPort() {
         return sessionServerPort;
     }
 
+    public void setSessionServerPort(Integer sessionServerPort) {
+        this.sessionServerPort = sessionServerPort;
+    }
+
     public boolean isConnect() {
+        return connect;
+    }
+
+    public Boolean getConnect() {
         return connect;
     }
 
@@ -55,12 +71,12 @@ public class DeviceInfo implements Serializable {
         this.connect = connect;
     }
 
-    public Boolean getConnect() {
-        return connect;
-    }
-
     public void connectToSession() {
         connect = true;
+    }
+
+    public void disconnectToSession() {
+        connect = false;
     }
 
     @Override

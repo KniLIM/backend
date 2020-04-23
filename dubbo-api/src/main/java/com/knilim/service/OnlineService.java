@@ -26,13 +26,29 @@ public interface OnlineService {
     void removeOnlineDevice(String userId, Device device);
 
     /**
-     * 验证设备的 {@code token} 是否合法，若合法则将设备状态改为 connected
+     * 验证设备的 {@code token} 是否合法
      * @param userId 指定的用户
      * @param device 指定的设备
      * @param token 验证的 token
-     * @return 验证结果
+     * @return 当且晋档用户存在，且状态为 disconnected 并验证 token 成功时返回 true，否则返回 false
      */
     boolean checkToken(String userId, Device device, String token);
+
+    /**
+     * 将 Id 为 {@code userId} 的用户的设备 {@code device} 的状态改为 connected
+     * @param userId 指定的用户
+     * @param device 指定的设备
+     * @return 当且仅当用户存在，且状态为 disconnected 并成功改变了状态时返回 true，否则返回 false
+     */
+    boolean connect(String userId, Device device);
+
+    /**
+     * 将 Id 为 {@code userId} 的用户的设备 {@code device} 的状态改为 disconnected
+     * @param userId 指定的用户
+     * @param device 指定的设备
+     * @return 当且仅当用户存在，且状态为 connected 并成功改变了状态时返回 true，否则返回 false
+     */
+    boolean disconnect(String userId, Device device);
 
     /**
      * 查找 Id 为 {@code userId} 的用户的设备 {@code device} 的信息
