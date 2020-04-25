@@ -1,19 +1,29 @@
 package com.knilim.group.dao.impl;
 
 import com.knilim.data.model.Group;
+import com.knilim.data.model.Notification;
+import com.knilim.data.model.User;
+import com.knilim.data.utils.NotificationType;
 import com.knilim.group.dao.GroupRepository;
 import com.knilim.data.model.UserTmp;
+import com.knilim.service.PushService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Repository
 public class JdbcGroupRepository implements GroupRepository {
     private JdbcTemplate jdbcTemplate;
+
+    @Reference
+    private PushService pushService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -34,7 +44,23 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public boolean delete(String groupId) {
-        // TODO 向该群所有成员发送推送通知
+        // 向该群所有成员发送推送通知
+        List<String> users = jdbcTemplate.query(
+                "select uid from IM.groupship where gid = ? and is_admin = 0",
+                new Object[]{groupId}, (rs, rowNum) -> rs.getString("uid")
+        );
+        Group group = jdbcTemplate.queryForObject(
+                "select * from IM.group where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(Group.class)
+        );
+        assert group != null;
+        pushService.addNotification(users.toArray(new String[0]),
+                new Notification(
+                        groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
+                        group.getName() + " 群聊已经解散！",
+                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+        );
         String sql = String.format("delete from IM.group where id = '%s'", groupId);
         return jdbcTemplate.update(sql) == 1;
     }
@@ -88,7 +114,8 @@ public class JdbcGroupRepository implements GroupRepository {
                                     rs.getString("avatar"),
                                     rs.getString("signature"),
                                     rs.getString("announcement"),
-                                    rs.getTimestamp("createdAt")
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
                             )
             );
         } catch (DataAccessException e) {
@@ -109,7 +136,8 @@ public class JdbcGroupRepository implements GroupRepository {
                                 rs.getString("avatar"),
                                 rs.getString("signature"),
                                 rs.getString("announcement"),
-                                rs.getTimestamp("created_at")
+                                new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                        (rs.getTimestamp("created_at"))
                         )
         );
     }
@@ -133,23 +161,58 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public boolean participation(String groupId, String userId, String comment) {
-        // 首先在群组表获得群主id
-        String owner = jdbcTemplate.queryForObject(
-                "select owner from IM.group where id = ?",
+        // 首先获取该群组信息和该用户信息
+        Group group = jdbcTemplate.queryForObject(
+                "select * from IM.group where id = ?",
                 new Object[]{groupId},
-                new BeanPropertyRowMapper<>(String.class)
+                new BeanPropertyRowMapper<>(Group.class)
         );
-        // TODO 创建群组申请 及 向群主发送消息推送
-
+        User user = jdbcTemplate.queryForObject(
+                "select * from IM.user where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(User.class)
+        );
+        // 向群主发送消息推送
+        assert group != null && user != null;
+        pushService.addNotification(group.getOwner(),
+                new Notification(
+                        group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
+                        user.getNickName() + "想要加入群聊：" + group.getName() + "。\n" +
+                                "说明：" + comment,
+                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+        );
         return false;
     }
 
     @Override
     public boolean handleParticipation(String groupId, String userId, String state) {
-        // TODO 修改申请表状态 以及根据state不同发送不同的推送通知
+        // 根据state不同发送不同的推送通知
+        String groupName = jdbcTemplate.queryForObject(
+                "select name from IM.group where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(String.class)
+        );
         if (state.equals("yes")) {
-            return true;
+            // 向该用户发送加群成功通知
+            pushService.addNotification(userId,
+                    new Notification(
+                            groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
+                            "您已加入群聊：" + groupName,
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+            );
+            // 将该用户添加到群组关系表
+            return jdbcTemplate.update(
+                    "insert into IM.groupship (uid, gid, is_admin) values ('?', '?', '?')",
+                    userId, groupId, 0
+            ) == 1;
         } else if (state.equals("no")) {
+            // 向该用户发送加群失败通知
+            pushService.addNotification(userId,
+                    new Notification(
+                            groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
+                            "您被拒绝加入群聊：" + groupName,
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+            );
             return true;
         } else
             return false;
@@ -157,8 +220,24 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public boolean exit(String groupId, String userId) {
-        // TODO 向群主发送推送消息
-
+        // 向群主发送推送消息
+        Group group = jdbcTemplate.queryForObject(
+                "select * from IM.group where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(Group.class)
+        );
+        User user = jdbcTemplate.queryForObject(
+                "select * from IM.user where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(User.class)
+        );
+        assert group != null && user != null;
+        pushService.addNotification(group.getOwner(),
+                new Notification(
+                        group.getOwner(), userId, NotificationType.N_GROUP_WITHDRAW_RESULT,
+                        user.getNickName() + "已经退出群聊：" + group.getName(),
+                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+        );
         return jdbcTemplate.update(
                 "delete from IM.group where gid = ? and uid = ?",
                 groupId, userId) == 1;
@@ -166,8 +245,19 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public boolean expel(String groupId, String userId) {
-        // TODO 向该群成员发送推送消息
-
+        // 向该群成员发送推送消息
+        Group group = jdbcTemplate.queryForObject(
+                "select * from IM.group where id = ?",
+                new Object[]{groupId},
+                new BeanPropertyRowMapper<>(Group.class)
+        );
+        assert group != null;
+        pushService.addNotification(userId,
+                new Notification(
+                        userId, group.getOwner(), NotificationType.N_GROUP_KICKOFF_RESULT,
+                        "您被踢出群聊：" + group.getName(),
+                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+        );
         return jdbcTemplate.update(
                 "delete from IM.group where gid = ? and uid = ?",
                 groupId, userId) == 1;
