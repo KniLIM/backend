@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_package = "com.knilim.push.data";
+option java_outer_classname = "NotiProto";
+
+message Notification {
+    enum NotiType {
+        N_FRIEND_ADD_APPLICATION    = 0;
+        N_FRIEND_ADD_RESULT         = 1;
+        N_FRIEND_DELETE_RESULT      = 2;
+        N_GROUP_JOIN_APPLICATION    = 3;
+        N_GROUP_JOIN_RESULT         = 4;
+        N_GROUP_WITHDRAW_RESULT     = 5;
+        N_GROUP_KICKOFF_RESULT      = 6;
+    }
+
+    string sender               = 1;
+    string receiver             = 2;
+    NotiType notificationType   = 3;
+    string content              = 4;
+    string createAt             = 5;
+}

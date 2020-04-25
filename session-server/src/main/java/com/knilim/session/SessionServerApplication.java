@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Bean;
 @EnableDiscoveryClient
 public class SessionServerApplication {
 
-    @Value("${knilim.session.host}")
+    @Value("${com.knilim.session.host}")
     private String host;
 
-    @Value("${knilim.session.port}")
+    @Value("${com.knilim.session.port}")
     private Integer port;
 
     @Bean
