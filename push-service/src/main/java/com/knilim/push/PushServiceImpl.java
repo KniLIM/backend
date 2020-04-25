@@ -1,9 +1,9 @@
 package com.knilim.push;
 
-import com.alibaba.fastjson.JSON;
 import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
+import com.knilim.push.data.NotiProto;
 import com.knilim.service.OnlineService;
 import com.knilim.service.PushService;
 import org.apache.dubbo.config.annotation.Reference;
@@ -47,7 +47,8 @@ public class PushServiceImpl implements PushService {
 
                     Map<String, String> requestBody = new HashMap<>();
                     requestBody.put("userId", userId);
-                    requestBody.put("notification", JSON.toJSONString(notification));
+                    String notificationStr = new String(makeNotificationBytes(notification));
+                    requestBody.put("notification", notificationStr);
                     template.postForObject(endpoint, requestBody, Void.class);
                 }
             });
@@ -65,5 +66,16 @@ public class PushServiceImpl implements PushService {
     public List<Notification> getOfflineNotificationByUserId(String userId) {
         List<Notification> notifications = template.boundListOps(userId).range(0, -1);
         return notifications == null ? new ArrayList<>() : notifications;
+    }
+
+    private static byte[] makeNotificationBytes(Notification notification) {
+        return NotiProto.Notification.newBuilder()
+                .setReceiver(notification.getRcvId())
+                .setSender(notification.getSenderId())
+                .setNotificationType(NotiProto.Notification.NotiType
+                        .forNumber(notification.getType().ordinal()))
+                .setContent(notification.getContent())
+                .build()
+                .toByteArray();
     }
 }

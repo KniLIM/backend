@@ -1,10 +1,8 @@
 package com.knilim.session.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
-import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
@@ -12,14 +10,11 @@ import com.knilim.session.model.Connect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -64,13 +59,15 @@ public class ForwardController {
         try {
             JSONObject object = JSONObject.parseObject(body);
             String userId = object.getString("userId");
-            Notification notification = JSONObject.parseObject(
-                    object.getString("notification"), Notification.class);
+            byte[] data = object.getString("notification").getBytes();
 
             Map<Device, Connect> connects = dao.getConnectsByUserId(userId);
             if (connects != null) {
                 connects.forEach((device, connect) -> {
-                    // TODO: 确定 notification 如何交互
+                    String key = dao.getKey(userId, device);
+                    byte[] encrypted = AESEncryptor.encrypt(data, key);
+                    UUID sessionId = UUID.fromString(connect.getSessionId());
+                    nps.getClient(sessionId).sendEvent("notification", encrypted);
                 });
             }
         } catch (Exception e) {
