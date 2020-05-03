@@ -2,7 +2,7 @@ package com.knilim.service;
 
 import com.knilim.data.model.Friendship;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface RelationshipService {
     /**
@@ -14,9 +14,9 @@ public interface RelationshipService {
      * e.g.
      * <p><pre>{@code
      *      String userId;
-     *      ArrayList<Friendship> res = getFriendsByUserId(userId);
+     *      List<Friendship> res = getFriendsByUserId(userId);
      * }</pre></p>
      *
      */
-    ArrayList<Friendship> getFriendsByUserId(String userId);
+    List<Friendship> getFriendsByUserId(String userId);
 }
