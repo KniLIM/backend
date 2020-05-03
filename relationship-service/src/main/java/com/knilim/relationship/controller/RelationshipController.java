@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.alibaba.fastjson.JSONObject;
 
+
 import java.util.List;
 
 @RestController
@@ -19,19 +20,30 @@ public class RelationshipController {
         this.relationshipRepository = relationshipRepository;
     }
 
+    @PostMapping("/friend/application")
+    public Response createApplication(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("use_id");
+        String friendId = params.getString("friend_id");
+        String uName = params.getString("u_name");
+        String instruction = params.getString("instruction");
+
+        relationshipRepository.addApplication(friendId, useId, uName, instruction);
+
+        return new Response(true, "result", null);
+
+    }
+
     @PatchMapping("/friend/application")
     public Response createRelationship(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
         String useId = params.getString("use_id");
         String friendId = params.getString("friend_id");
+        String fName = params.getString("f_name");
         Boolean state = params.getBoolean("state");
-        if(state){
-            return relationshipRepository.insert(useId, friendId)?
+        return relationshipRepository.insert(useId, friendId, fName, state)?
                     new Response(true, "result", null):
                     new Response(false, "error_msg", Error.InsertFailed.getMsg());
-        }else{
-            return new Response(true, "result", null);
-        }
     }
 
     @DeleteMapping("/friend/")
