@@ -79,7 +79,7 @@ public class RelationshipController {
                 new Response(false, "error_msg", Error.UpdateFailed.getMsg());
     }
 
-    @GetMapping("/friend/")
+    @GetMapping("/friend/{id}")
     public Response getFriendList(@PathVariable(value = "id") String userId) {
             List<Friendship> friends = relationshipRepository.getFriendsByUserId(userId);
             return friends != null ?
