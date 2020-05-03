@@ -7,17 +7,17 @@ import com.knilim.service.GroupService;
 import com.knilim.service.OfflineService;
 import com.knilim.service.OnlineService;
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@Service
 public class GroupServiceImpl implements GroupService {
 
     private JdbcTemplate jdbcTemplate;

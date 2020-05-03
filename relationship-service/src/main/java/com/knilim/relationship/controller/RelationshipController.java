@@ -4,6 +4,7 @@ import com.knilim.data.model.Friendship;
 import com.knilim.relationship.dao.RelationshipRepository;
 import com.knilim.relationship.utils.Response;
 import com.knilim.relationship.utils.Error;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.alibaba.fastjson.JSONObject;
 
@@ -14,6 +15,7 @@ import java.util.List;
 public class RelationshipController {
     private RelationshipRepository relationshipRepository;
 
+    @Autowired
     public void setRelationshipRepository(RelationshipRepository relationshipRepository) {
         this.relationshipRepository = relationshipRepository;
     }
@@ -91,7 +93,7 @@ public class RelationshipController {
                 new Response(false, "error_msg", Error.UpdateFailed.getMsg());
     }
 
-    @GetMapping("/friend/")
+    @GetMapping("/friend/{id}")
     public Response getFriendList(@PathVariable(value = "id") String userId) {
             List<Friendship> friends = relationshipRepository.getFriendsByUserId(userId);
             return friends != null ?

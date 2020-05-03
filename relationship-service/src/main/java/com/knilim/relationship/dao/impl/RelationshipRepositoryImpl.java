@@ -10,12 +10,14 @@ import org.springframework.data.annotation.Reference;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 import com.knilim.service.PushService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+@Repository
 public class RelationshipRepositoryImpl implements RelationshipRepository {
     private JdbcTemplate jdbcTemplate;
 
