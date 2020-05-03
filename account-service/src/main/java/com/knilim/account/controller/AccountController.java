@@ -87,7 +87,7 @@ public class AccountController {
 
             // 获取好友信息和群组信息
             List<Group> groups = groupService.getGroupsByUserId(userId);
-            ArrayList<Friendship> friends = relationshipService.getFriendsByUserId(userId);
+            List<Friendship> friends = relationshipService.getFriendsByUserId(userId);
 
             return Util.loginSuccess(user, friends, groups, ipPort);
         } catch (Exception e) {
@@ -179,7 +179,7 @@ class Util {
         return new Response(false, new Tuple<>("msg", error.getMsg()));
     }
     static Response modifySuccess(String id) { return new Response(true, new Tuple<>("user_id", id)); }
-    static Response loginSuccess(User user, ArrayList<Friendship> friends, List<Group> groups, Tuple<String,Integer> ipPort) {
+    static Response loginSuccess(User user, List<Friendship> friends, List<Group> groups, Tuple<String,Integer> ipPort) {
         return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort));
     }
     static Response searchSuccess(User user) {return new Response(true,new Tuple<>("self",user));}
