@@ -71,17 +71,24 @@ public class AccountController {
             if (account == null) return Util.loginError(Error.NoAccount);
             if (password == null) return Util.loginError(Error.NoPassword);
 
-            // todo 验证登录信息, 选取合适的session server, 写入中心在线数据库 楠哥看看这里是否满足要求
+            // 验证登录信息
             if (!accountRepository.checkPassword(account, password)) return Util.loginError(Error.PasswordError);
             User user;
             if (account.contains("@")) user = accountRepository.getUserByEmail(account);
             else user = accountRepository.getUserByPhone(account);
             String userId = user.getId();
+
+            // 选取合适的session server
             Tuple<String, Integer> ipPort = forwardService.getAvailableSession();
+
+            // 写入中心在线数据库
             String token = UUID.randomUUID().toString();
             onlineService.addOnlineDevice(userId, DeviceUtil.fromString(device), token, ipPort.getFirst(), ipPort.getSecond());
+
+            // 获取好友信息和群组信息
             List<Group> groups = groupService.getGroupsByUserId(userId);
             ArrayList<Friendship> friends = relationshipService.getFriendsByUserId(userId);
+
             return Util.longinSuccess(user, friends, groups, ipPort);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
