@@ -7,12 +7,14 @@ import java.util.List;
 public interface RelationshipRepository {
 
     /**
-     * 新建一个好友关系表
+     * 添加好友关系
      * @param uid 添加方
      * @param friend 被添加方
+     * @param fName 被添加方用户名
+     * @param state 是否同意状态
      * @return 是否成功
      */
-    boolean insert(String uid, String friend);
+    boolean insert(String uid, String friend, String fName, Boolean state);
 
     /**
      * 删除一个好友关系
@@ -40,4 +42,12 @@ public interface RelationshipRepository {
      */
     List<Friendship> getFriendsByUserId(String uid);
 
+    /**
+     * 添加好友申请
+     * @param friendId 被申请人id
+     * @param useId 申请人id
+     * @param uName 申请人用户名
+     * @param instruction 申请说明
+     */
+    void addApplication(String friendId, String useId, String uName, String instruction);
 }

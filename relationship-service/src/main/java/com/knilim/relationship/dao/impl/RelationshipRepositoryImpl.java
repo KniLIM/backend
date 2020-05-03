@@ -1,39 +1,85 @@
 package com.knilim.relationship.dao.impl;
 
 import com.knilim.data.model.Friendship;
+import com.knilim.data.model.Notification;
+import com.knilim.data.utils.NotificationType;
 import com.knilim.relationship.dao.RelationshipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.annotation.Reference;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import com.knilim.service.PushService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class RelationshipRepositoryImpl implements RelationshipRepository {
     private JdbcTemplate jdbcTemplate;
+
+    @Reference
+    private PushService pushService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
-    public boolean insert(String uid, String friend) {
-        //好友表插正反两个
-        String sql1 = String.format("insert into IM.friendship" +
-                "(uid, friend, ) values ('%s, '%s')", uid, friend);
+    private Friendship getFriendshipByUidAndFriend(String uid, String friend){
+        String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
+        return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
+    }
 
-        String sql2 = String.format("insert into IM.friendship" +
-                "(uid, friend, ) values ('%s, '%s')", friend, uid);
-        return jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1;
+    @Override
+    public boolean insert(String uid, String friend, String fName, Boolean state) {
+        if(state){
+            //好友表插正反两个
+            String sql1 = String.format("insert into IM.friendship" +
+                    "(uid, friend, ) values ('%s, '%s')", uid, friend);
+
+            String sql2 = String.format("insert into IM.friendship" +
+                    "(uid, friend, ) values ('%s, '%s')", friend, uid);
+
+            //发送成功通知
+            if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
+                pushService.addNotification(friend,
+                    new Notification(
+                            uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
+                            "用户 " + fName +" 已通过您的好友申请！",
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+                 );
+            return true;
+            } else return false;
+        }else {
+            //发送失败通知
+            pushService.addNotification(friend,
+                    new Notification(
+                            uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
+                            "用户 " + fName +" 未通过您的好友申请！",
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+            );
+            return true;
+        }
     }
 
     @Override
     public boolean delete(String uid, String friend) {
+        Friendship friendship = getFriendshipByUidAndFriend(friend, uid);
+
         String sql1 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
         String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
-        return jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1;
+        if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
+            //发送删除好友通知
+            pushService.addNotification(uid,
+                    new Notification(
+                            friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
+                            "您的好友 " + friendship.getNickname() + " 已删除与您的好友关系！",
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+            );
+            return true;
+        }else return false;
     }
 
     @Override
@@ -73,6 +119,15 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         }catch (DataAccessException e){
             return null;
         }
+    }
+    @Override
+    public void addApplication(String friendId, String useId, String uName, String instruction){
+        pushService.addNotification(useId,
+                new Notification(
+                        friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
+                        "用户 " + uName + " 申请添加您为好友，申请说明\n" + instruction,
+                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+        );
     }
 
 }
