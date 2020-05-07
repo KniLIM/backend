@@ -3,6 +3,7 @@ package com.knilim.data.model;
 import com.knilim.data.utils.NotificationType;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Notification implements Serializable {
 
@@ -64,5 +65,17 @@ public class Notification implements Serializable {
 
     public void setCreateAt(String createAt) {
         this.createAt = createAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Notification)) return false;
+        Notification that = (Notification) o;
+        return Objects.equals(rcvId, that.rcvId) &&
+                Objects.equals(senderId, that.senderId) &&
+                type == that.type &&
+                Objects.equals(content, that.content) &&
+                Objects.equals(createAt, that.createAt);
     }
 }

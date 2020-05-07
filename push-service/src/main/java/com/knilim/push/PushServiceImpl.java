@@ -9,7 +9,6 @@ import com.knilim.service.PushService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,7 +26,6 @@ public class PushServiceImpl implements PushService {
     private OnlineService onlineService;
 
     @Override
-    @Async
     public void addNotification(String userId, Notification notification) {
         Map<Device, DeviceInfo> devices = onlineService.getDevicesByUserId(userId);
 
@@ -56,16 +54,13 @@ public class PushServiceImpl implements PushService {
     }
 
     @Override
-    public void addNotification(String[] userIds, Notification notification) {
-        for (String userId: userIds) {
-            addNotification(userId, notification);
-        }
-    }
-
-    @Override
     public List<Notification> getOfflineNotificationByUserId(String userId) {
         List<Notification> notifications = template.boundListOps(userId).range(0, -1);
-        return notifications == null ? new ArrayList<>() : notifications;
+        if (notifications != null) {
+            template.delete(userId);
+            return notifications;
+        }
+        return new ArrayList<>();
     }
 
     private static byte[] makeNotificationBytes(Notification notification) {
