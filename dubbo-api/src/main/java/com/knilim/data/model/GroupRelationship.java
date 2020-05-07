@@ -14,7 +14,7 @@ public class GroupRelationship implements Serializable {
 
     private Boolean isBlock;
 
-    private Timestamp createdAt;
+    private String createdAt;
 
     private String userAvatar;
 
@@ -60,11 +60,11 @@ public class GroupRelationship implements Serializable {
         isBlock = block;
     }
 
-    public Timestamp getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 

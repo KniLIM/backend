@@ -4,19 +4,29 @@ import com.knilim.data.model.Group;
 import com.knilim.data.utils.Tuple;
 import com.knilim.data.model.UserTmp;
 import com.knilim.service.GroupService;
+import com.knilim.service.OfflineService;
+import com.knilim.service.OnlineService;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@Service
 public class GroupServiceImpl implements GroupService {
 
     private JdbcTemplate jdbcTemplate;
+
+    @Reference
+    private OfflineService offlineService;
+
+    @Reference
+    private OnlineService onlineService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -51,7 +61,8 @@ public class GroupServiceImpl implements GroupService {
                                     rs.getString("avatar"),
                                     rs.getString("signature"),
                                     rs.getString("announcement"),
-                                    rs.getTimestamp("createdAt")
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
                             )
             );
         } catch (DataAccessException e) {
@@ -78,8 +89,20 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<String> sendGroupMsg(String groupId, Byte[] msg) {
-        // TODO 群发消息RPC接口
-        return null;
+        // 首先获取该群所有用户
+        List<String> users = jdbcTemplate.query(
+                "select uid from IM.groupship where gid = ?",
+                new Object[]{groupId}, (rs, rowNum) -> rs.getString("uid")
+        );
+        List<String> onlineUsers = new ArrayList<>();
+        for (String user : users) {
+            // 如果用户在线，则添加该用户到在线用户列表用以返回
+            if (onlineService.getDevicesByUserId(user) != null) onlineUsers.add(user);
+
+            // 如果用户不在线，则对其进行离线消息的转发
+            else offlineService.addOfflineMsg(user, msg);
+        }
+        return onlineUsers;
     }
 
     @Override
@@ -96,7 +119,8 @@ public class GroupServiceImpl implements GroupService {
                                 rs.getString("avatar"),
                                 rs.getString("signature"),
                                 rs.getString("announcement"),
-                                rs.getTimestamp("createdAt")
+                                new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                        (rs.getTimestamp("created_at"))
                         )
         );
         List<Tuple<Group, List<UserTmp>>> res = new ArrayList<>();

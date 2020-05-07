@@ -8,4 +8,5 @@ public enum NotificationType {
     N_GROUP_JOIN_RESULT,            // 加群聊结果 群聊 -> 申请人
     N_GROUP_WITHDRAW_RESULT,        // 退群聊结果 申请人 -> 群管理
     N_GROUP_KICKOFF_RESULT,         // 踢人结果 群聊 -> 被踢人
+    N_GROUP_DELETE,                 // 删群结果 群管理 -> 所有群员
 }

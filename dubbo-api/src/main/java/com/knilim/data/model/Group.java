@@ -18,7 +18,7 @@ public class Group implements Serializable {
 
     private String announcement;
 
-    private Timestamp createdAt;
+    private String createdAt;
 
     /**
      * 这个构造方法不要删!!!有用的!
@@ -27,7 +27,7 @@ public class Group implements Serializable {
     public Group(){}
 
     public Group(String id, String owner, String name, String avatar,
-                 String signature, String announcement, Timestamp createdAt) {
+                 String signature, String announcement, String createdAt) {
         this.id = id;
         this.owner = owner;
         this.name = name;
@@ -85,11 +85,11 @@ public class Group implements Serializable {
         this.announcement = announcement;
     }
 
-    public Timestamp getCreated_at() {
+    public String getCreated_at() {
         return createdAt;
     }
 
-    public void setCreated_at(Timestamp created_at) {
+    public void setCreated_at(String created_at) {
         this.createdAt = created_at;
     }
 }
