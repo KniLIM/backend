@@ -12,11 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class JdbcGroupRepository implements GroupRepository {
@@ -55,12 +58,14 @@ public class JdbcGroupRepository implements GroupRepository {
                 new BeanPropertyRowMapper<>(Group.class)
         );
         assert group != null;
-        pushService.addNotification(users.toArray(new String[0]),
-                new Notification(
-                        groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
-                        group.getName() + " 群聊已经解散！",
-                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-        );
+        for (String user : users) {
+            pushService.addNotification(user,
+                    new Notification(
+                            groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
+                            group.getName() + " 群聊已经解散！",
+                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+            );
+        }
         String sql = String.format("delete from IM.group where id = '%s'", groupId);
         return jdbcTemplate.update(sql) == 1;
     }
@@ -98,24 +103,20 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public List<Group> getGroupsByUserId(String userId) throws DataAccessException {
-        // 首先根据群组关系表得到该用户所有群的id
-        String sql1 = String.format("select gid from IM.groupship where uid = '%s'", userId);
         try {
-            List<String> gids = jdbcTemplate.query(sql1, new BeanPropertyRowMapper<>(String.class));
-            //然后根据所有群id，在群组表里获得这些群组的对象并返回
             return jdbcTemplate.query(
-                    "select * from IM.group where id = ?",
-                    gids.toArray(),
+                    "select * from IM.group as a, IM.groupship as b where a.id = b.gid and b.uid = ?",
+                    new Object[]{userId},
                     (rs, rowNum) ->
                             new Group(
-                                    rs.getString("id"),
-                                    rs.getString("owner"),
-                                    rs.getString("name"),
-                                    rs.getString("avatar"),
-                                    rs.getString("signature"),
-                                    rs.getString("announcement"),
+                                    rs.getString("a.id"),
+                                    rs.getString("a.owner"),
+                                    rs.getString("a.name"),
+                                    rs.getString("a.avatar"),
+                                    rs.getString("a.signature"),
+                                    rs.getString("a.announcement"),
                                     new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
-                                            (rs.getTimestamp("created_at"))
+                                            (rs.getTimestamp("a.created_at"))
                             )
             );
         } catch (DataAccessException e) {
@@ -126,8 +127,8 @@ public class JdbcGroupRepository implements GroupRepository {
     @Override
     public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
-                "select * from IM.group where owner like ? or name like ? or signature like ?",
-                new Object[]{"%" + Keyword + "%", "%" + Keyword + "%", "%" + Keyword + "%"},
+                "select * from IM.group where name like ? or signature like ?",
+                new Object[]{"%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
                                 rs.getString("id"),
@@ -152,7 +153,7 @@ public class JdbcGroupRepository implements GroupRepository {
                         new UserTmp(
                                 rs.getString("id"),
                                 rs.getString("nickname"),
-                                rs.getString("avator"),
+                                rs.getString("avatar"),
                                 rs.getString("memo"),
                                 rs.getBoolean("is_admin")
                         )
@@ -266,7 +267,7 @@ public class JdbcGroupRepository implements GroupRepository {
     @Override
     public boolean memo(String groupId, String userId, String newNickname) {
         return jdbcTemplate.update(
-                "update IM.group set memo = ? where gid = ? and uid = ?",
+                "update IM.groupship set memo = ? where gid = ? and uid = ?",
                 newNickname, groupId, userId) == 1;
     }
 }

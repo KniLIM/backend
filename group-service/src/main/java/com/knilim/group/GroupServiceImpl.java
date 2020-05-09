@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -45,24 +47,20 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<Group> getGroupsByUserId(String userId) {
-        // 首先根据群组关系表得到该用户所有群的id
-        String sql1 = String.format("select gid from IM.groupship where uid = '%s'", userId);
         try {
-            List<String> gids = jdbcTemplate.query(sql1, new BeanPropertyRowMapper<>(String.class));
-            //然后根据所有群id，在群组表里获得这些群组的对象并返回
             return jdbcTemplate.query(
-                    "select * from IM.group where id = ?",
-                    gids.toArray(),
+                    "select * from IM.group as a, IM.groupship as b where a.id = b.gid and b.uid = ?",
+                    new Object[]{userId},
                     (rs, rowNum) ->
                             new Group(
-                                    rs.getString("id"),
-                                    rs.getString("owner"),
-                                    rs.getString("name"),
-                                    rs.getString("avatar"),
-                                    rs.getString("signature"),
-                                    rs.getString("announcement"),
+                                    rs.getString("a.id"),
+                                    rs.getString("a.owner"),
+                                    rs.getString("a.name"),
+                                    rs.getString("a.avatar"),
+                                    rs.getString("a.signature"),
+                                    rs.getString("a.announcement"),
                                     new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
-                                            (rs.getTimestamp("created_at"))
+                                            (rs.getTimestamp("a.created_at"))
                             )
             );
         } catch (DataAccessException e) {
