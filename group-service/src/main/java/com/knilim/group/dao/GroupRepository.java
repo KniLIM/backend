@@ -61,7 +61,7 @@ public interface GroupRepository {
     List<UserTmp> getMembers(String groupId);
 
     /**
-     * 发送加群通知，在申请表添加记录，并向该群群主发送推送通知
+     * 发送加群通知，并向该群群主发送推送通知
      * @param groupId 群id
      * @param userId 用户id
      * @param comment 加群内容/原因/说明
