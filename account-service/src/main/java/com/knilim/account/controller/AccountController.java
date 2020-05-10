@@ -121,7 +121,7 @@ public class AccountController {
         }
     }
 
-    @PostMapping("/account/{id}")
+    @GetMapping("/account/{id}")
     public Response searchById(@PathVariable(value="id") String id){
         try {
             if (id == null || id.equals("")) return Util.searchError(Error.NoUser);

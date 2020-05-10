@@ -101,7 +101,7 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public boolean checkPassword(String account, String password) {
-        String sql = String.format("Select password from IM.user where account = '%s' or email = '%s'",account,account);
+        String sql = String.format("Select password from IM.user where phone = '%s' or email = '%s'",account,account);
         String getPassword = jdbcTemplate.queryForObject(sql,String.class);
         return password.equals(getPassword);
     }
