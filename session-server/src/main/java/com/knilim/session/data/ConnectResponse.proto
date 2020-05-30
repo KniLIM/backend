@@ -1,6 +1,6 @@
 syntax = "proto3";
 option java_package = "com.knilim.session.data";
-option java_outer_classname = "ConnectResponse";
+option java_outer_classname = "ConnectResponseProto";
 
 message ConnectResponse {
     string Y = 1;
