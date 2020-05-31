@@ -1,6 +1,8 @@
 package com.knilim.data.utils;
 
-public class Tuple<T, E> {
+import java.io.Serializable;
+
+public class Tuple<T, E> implements Serializable {
     private T first;
     private E second;
 
