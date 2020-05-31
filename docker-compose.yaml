@@ -20,7 +20,7 @@ services:
     container_name: com.knilim.online
     command: redis-server --requirepass 123456
     ports:
-      - "6379:6379"
+      - "6390:6379"
 
   com.knilim.local.redis:
     image: redis:latest
