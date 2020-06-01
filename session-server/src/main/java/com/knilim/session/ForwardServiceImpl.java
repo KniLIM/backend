@@ -17,6 +17,8 @@ import java.util.Enumeration;
 @Component
 public class ForwardServiceImpl implements ForwardService {
 
+    private String host;
+
     @Value("${com.knilim.session.port}")
     private Integer port;
 
@@ -25,16 +27,17 @@ public class ForwardServiceImpl implements ForwardService {
 
     @Override
     public Tuple<String, Integer> getAvailableSession() {
-        String host;
-        try {
-            if(isLocal) {
-                host = "127.0.0.1";
-            } else {
-                host = getPublicAddress();
+        if(host == null || host.isEmpty()) {
+            try {
+                if(isLocal) {
+                    host = "127.0.0.1";
+                } else {
+                    host = getPublicAddress();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                host = "";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            host = "";
         }
         return new Tuple<>(host, port);
     }
