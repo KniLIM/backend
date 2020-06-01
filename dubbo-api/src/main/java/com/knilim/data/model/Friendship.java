@@ -15,7 +15,7 @@ public class Friendship implements Serializable {
 
     private Boolean isBlack;
 
-    private Timestamp createdAt;
+    private String createdAt;
 
     /**
      * 这个构造方法不要删!!!有用的!
@@ -29,7 +29,7 @@ public class Friendship implements Serializable {
         this.nickname = nickname;
     }
 
-    public Friendship(String uid, String friend, String nickname, Boolean isTop, Boolean isBlack, Timestamp createdAt) {
+    public Friendship(String uid, String friend, String nickname, Boolean isTop, Boolean isBlack, String createdAt) {
         this.uid = uid;
         this.friend = friend;
         this.nickname = nickname;
@@ -78,11 +78,11 @@ public class Friendship implements Serializable {
         this.isBlack = isBlack;
     }
 
-    public Timestamp getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 }

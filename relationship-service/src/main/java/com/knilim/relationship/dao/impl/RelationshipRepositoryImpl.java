@@ -115,7 +115,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
                         friendship.setNickname(rs.getString("nickname"));
                         friendship.setIsBlack(rs.getBoolean("isBlack"));
                         friendship.setIsTop(rs.getBoolean("isTop"));
-                        friendship.setCreatedAt(rs.getTimestamp("createdAt"));
+                        friendship.setCreatedAt(rs.getString("createdAt"));
                         return friendship;
                     });
         }catch (DataAccessException e){
