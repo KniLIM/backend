@@ -91,7 +91,7 @@ public class AccountController {
             // 拉取离线消息
             List<Byte[]>  offlineMessages = offlineService.getOfflineMsgs(user.getId());
 
-            return Util.loginSuccess(user, friends, groups, ipPort, offlineMessages);
+            return Util.loginSuccess(user, friends, groups, ipPort, offlineMessages, token);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
         }
@@ -181,8 +181,8 @@ class Util {
         return new Response(false, new Tuple<>("msg", error.getMsg()));
     }
     static Response modifySuccess(String id) { return new Response(true, new Tuple<>("user_id", id)); }
-    static Response loginSuccess(User user, List<Friendship> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages) {
-        return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort), new Tuple<>("offlineMessages", messages));
+    static Response loginSuccess(User user, List<Friendship> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages, String token) {
+        return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort), new Tuple<>("offlineMessages", messages), new Tuple<>("token", token));
     }
     static Response searchSuccess(User user) {return new Response(true,new Tuple<>("self",user));}
     static Response ServerError(Error error, String detail) {
