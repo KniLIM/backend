@@ -212,15 +212,14 @@ class Util {
         return new Response(false, new Tuple<>("msg", error.getMsg()), new Tuple<>("detail", detail));
     }
 
-    static User compareNewUser(User user, User newUser) {
+    static void compareNewUser(User user, User newUser) {
         if(newUser.getEmail() != null) user.setEmail(newUser.getEmail());
         if(newUser.getPhone() != null) user.setPhone(newUser.getPhone());
         if(newUser.getNickName() != null) user.setNickName(newUser.getNickName());
-        if(newUser.getAvatar() != null) user.setNickName(newUser.getAvatar());
+        if(newUser.getAvatar() != null) user.setAvatar(newUser.getAvatar());
         if(newUser.getSex() != null) user.setSex(newUser.getSex());
         if(newUser.getSignature() != null) user.setSignature(newUser.getSignature());
         if(newUser.getLocation() != null) user.setLocation(newUser.getLocation());
         if(newUser.getBirthday() != null) user.setBirthday(newUser.getBirthday());
-        return user;
     }
 }
