@@ -24,7 +24,7 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public boolean insert(User user) {
-        String sql = String.format("insert into IM.user (id, email, phone, password, nickname) values ('%s', '%s', '%s','%s','%s')", user.getId(), user.getEmail(), user.getPhone(), user.getPassWord(), user.getNickName());
+        String sql = String.format("insert into IM.user (id, email, phone, password, nickname, sex, birthday, avatar, location, signature) values ('%s', '%s', '%s','%s','%s', %b, '%s', '%s', '%s', '%s')", user.getId(), user.getEmail(), user.getPhone(), user.getPassWord(), user.getNickName(), user.getSex(), user.getBirthday(), user.getAvatar(), user.getLocation(), user.getSignature());
         return jdbcTemplate.update(sql) == 1;
     }
 
@@ -50,9 +50,9 @@ public class JdbcAccountRepository implements AccountRepository {
     }
   
     public boolean updateUserInformation(User user) {
-        String sql = String.format("update IM.user set email='%s', phone='%s', nickname='%s', avator='%s', sex='%b', " +
+        String sql = String.format("update IM.user set email='%s', phone='%s', nickname='%s', avatar='%s', sex=%b, " +
                 "signature='%s', location='%s', birthday='%s' where id='%s'", user.getEmail(), user.getPhone(), user.getNickName(),
-                user.getAvatar(), user.isSex(), user.getSignature(), user.getLocation(), user.getBirthday(), user.getId());
+                user.getAvatar(), user.getSex(), user.getSignature(), user.getLocation(), user.getBirthday(), user.getId());
         return jdbcTemplate.update(sql) == 1;
     }
 
@@ -67,10 +67,14 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public User searchById(String id) {
-        String sql = String.format("select * from IM.user where id='%s'",id);
-        RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
-        User user = jdbcTemplate.queryForObject(sql, rowMapper);
-        return user;
+        try {
+            String sql = String.format("select * from IM.user where id='%s'", id);
+            RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
+            return jdbcTemplate.queryForObject(sql, rowMapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
