@@ -13,7 +13,7 @@ import com.knilim.service.OfflineService;
 import com.knilim.service.OnlineService;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
-import com.knilim.session.data.MsgProto;
+import com.knilim.session.data.RedundanceProto;
 import com.knilim.session.model.Connect;
 import org.apache.dubbo.config.annotation.Reference;
 import org.slf4j.Logger;
@@ -63,7 +63,7 @@ public class MsgHandler {
     private DataListener<byte[]> onSendMsg() {
         return (client, data, ackSender) -> {
             try {
-                MsgProto.Msg msg = MsgProto.Msg.parseFrom(data);
+                RedundanceProto.Redundance msg = RedundanceProto.Redundance.parseFrom(data);
                 ackSender.sendAckData("send-ack");
                 // 解密
                 String key = dao.getKey(msg.getSender(), DeviceUtil.fromString(msg.getDevice()));
@@ -102,9 +102,9 @@ public class MsgHandler {
         }
     }
 
-    private void sendMsgToRcv(String rcv, MsgProto.Msg.MsgType type, byte[] data) {
+    private void sendMsgToRcv(String rcv, RedundanceProto.Redundance.MsgType type, byte[] data) {
         // 群聊
-//        if (type == MsgProto.Msg.MsgType.P2G) {
+//        if (type == RedundanceProto.Redundance.MsgType.P2G) {
 //            groupService.sendGroupMsg(rcv, BytesUtil.toObj(data));
 //            return;
 //        }
