@@ -15,6 +15,7 @@ import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
 import com.knilim.session.data.MsgProto;
 import com.knilim.session.model.Connect;
+import com.knilim.session.utils.HostManager;
 import org.apache.dubbo.config.annotation.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class MsgHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MsgHandler.class);
 
-    private SocketIONamespace namespace;
+    private final SocketIONamespace namespace;
 
     @Reference
     private OnlineService onlineService;
@@ -45,19 +46,13 @@ public class MsgHandler {
     @Resource
     private ClientDao dao;
 
-    private String host;
+    private final String host;
 
     @Autowired
     public MsgHandler(SocketIOServer server) {
         this.namespace = server.getNamespace("/sockets");
         this.namespace.addEventListener("send-msg", byte[].class, onSendMsg());
-
-        try {
-            this.host = InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.host = "";
-        }
+        this.host = HostManager.INSTANCE.getHost();
     }
 
     private DataListener<byte[]> onSendMsg() {
