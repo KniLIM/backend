@@ -29,6 +29,12 @@ public class GroupController {
         if (group.getName() == null)
             return new Response(false, "error_msg", Error.NoGroupName.getMsg());
         group.setId(UUID.randomUUID().toString());
+        if(group.getAvatar() == null) {
+            group.setAvatar("http://cdn.loheagn.com/2020-06-12-Snipaste_2020-06-12_17-51-01.png");
+        }
+        if(group.getSignature() == null) {
+            group.setAvatar("群聊天");
+        }
         return groupRepository.insert(group) ?
                 new Response(true, "result", group) :
                 new Response(false, "error_msg", Error.InsertFailed.getMsg());

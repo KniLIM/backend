@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 public class AccountController {
@@ -95,7 +96,12 @@ public class AccountController {
 
             // 获取好友信息和群组信息
             List<Group> groups = groupService.getGroupsByUserId(userId);
-            List<Friendship> friends = relationshipService.getFriendsByUserId(userId);
+            List<Friendship> friendships = relationshipService.getFriendsByUserId(userId);
+            List<JSONObject> friends = friendships.stream().map(friendship -> {
+                JSONObject result = JSONObject.parseObject(JSONObject.toJSONString(friendship));
+                result.put("avatar", accountRepository.searchById(friendship.getFriend()).getAvatar());
+                return result;
+            }).collect(Collectors.toList());
 
             // 拉取离线消息
             List<Byte[]>  offlineMessages = offlineService.getOfflineMsgs(user.getId());
@@ -204,7 +210,7 @@ class Util {
         return new Response(false, new Tuple<>("msg", error.getMsg()));
     }
     static Response modifySuccess(String id) { return new Response(true, new Tuple<>("user_id", id)); }
-    static Response loginSuccess(User user, List<Friendship> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages, String token) {
+    static Response loginSuccess(User user, List<JSONObject> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages, String token) {
         return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort), new Tuple<>("offlineMessages", messages), new Tuple<>("token", token));
     }
     static Response searchSuccess(User user) {return new Response(true,new Tuple<>("self",user));}
