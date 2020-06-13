@@ -63,29 +63,30 @@ public class ConnectHandler {
     private ConnectListener onConnect() {
         // 返回事件为  connect-error connect-ack
         return socketIOClient -> {
-            HandshakeData handshake = socketIOClient.getHandshakeData();
-            String hello = handshake.getSingleUrlParam("hello");
-            String clientKey = handshake.getSingleUrlParam("clientKey");
-            String token = handshake.getSingleUrlParam("token");
-            String userId = handshake.getSingleUrlParam("userId");
-            Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
+            try {
+                HandshakeData handshake = socketIOClient.getHandshakeData();
+                String hello = handshake.getSingleUrlParam("hello");
+                String clientKey = handshake.getSingleUrlParam("clientKey");
+                String token = handshake.getSingleUrlParam("token");
+                String userId = handshake.getSingleUrlParam("userId");
+                Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
 
-            // check token
-            if (!onlineService.checkToken(userId, device, token)) {
-                logger.info("Client[{}] userId[{}] and token[{}] mismatch", socketIOClient.getSessionId(), userId, token);
-                socketIOClient.sendEvent("connect-error", "token error");
-                socketIOClient.disconnect();
-            } else {
-                // init key
-                String key = DH.initSecretKey(clientKey);
-                String decryptData = new String(AESEncryptor.decrypt(hello.getBytes(), key));
+                // check token
+                if (!onlineService.checkToken(userId, device, token)) {
+                    logger.info("Client[{}] userId[{}] and token[{}] mismatch", socketIOClient.getSessionId(), userId, token);
+                    socketIOClient.sendEvent("connect-error", "token error");
+                    socketIOClient.disconnect();
+                } else {
+                    // init key
+                    String key = DH.initSecretKey(clientKey);
+                    String decryptData = new String(AESEncryptor.decrypt(hello.getBytes(), key));
 
-                // check key for decry ping
-                if (decryptData.equals("hello")) {
-                    localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
-                            handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
-                            clientKey);
-                    List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
+                    // check key for decry ping
+                    if (decryptData.equals("hello")) {
+                        localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
+                                handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
+                                clientKey);
+                        List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
 //                    List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
 //                    if (offlineMsgs != null && pushMsgs != null
 //                            && !offlineMsgs.isEmpty() && !pushMsgs.isEmpty()) {
@@ -97,16 +98,23 @@ public class ConnectHandler {
 //                    } else {
 //                        socketIOClient.sendEvent("connect-ack");
 //                    }
-                    if (offlineMsgs != null
-                            && !offlineMsgs.isEmpty()) {
-                        socketIOClient.sendEvent("connect-ack", offlineMsgs);
+                        if (offlineMsgs != null
+                                && !offlineMsgs.isEmpty()) {
+                            socketIOClient.sendEvent("connect-ack", offlineMsgs);
+                        } else {
+                            socketIOClient.sendEvent("connect-ack");
+                        }
                     } else {
-                        socketIOClient.sendEvent("connect-ack");
+                        socketIOClient.sendEvent("connect-error", "key error");
+                        socketIOClient.disconnect();
                     }
-                } else {
-                    socketIOClient.sendEvent("connect-error", "key error");
-                    socketIOClient.disconnect();
                 }
+            } catch (NullPointerException e) {
+                socketIOClient.sendEvent("connect-error", "please check your param");
+                socketIOClient.disconnect();
+            } catch (Exception e) {
+                socketIOClient.sendEvent("connect-error", "500 error " + e.getMessage());
+                socketIOClient.disconnect();
             }
         };
     }
