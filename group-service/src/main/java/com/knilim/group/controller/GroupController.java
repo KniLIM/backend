@@ -74,22 +74,11 @@ public class GroupController {
     }
 
     @GetMapping("/group/")
-    public Response getGroupList(@RequestBody String json) {
-        JSONObject params = JSONObject.parseObject(json);
-        String userId = params.getString("user_id");
-        String keyword = params.getString("keyword");
-        // userId 和 keyword 2选1，若是userId则返回该user的群list；若是keyword则返回搜索keyword的所有群list
-        if (userId != null) {
-            List<Group> groups = groupRepository.getGroupsByUserId(userId);
-            return groups != null ?
-                    new Response(true, "result", groups) :
-                    new Response(false, "error_msg", Error.GetGroupListByUserIdFailed.getMsg());
-        } else {
-            List<Group> groups = groupRepository.getGroupsByKeyword(keyword);
-            return groups != null ?
-                    new Response(true, "result", groups) :
-                    new Response(false, "error_msg", Error.GetGroupListByKeywordFailed.getMsg());
-        }
+    public Response getGroupList(@RequestParam("keyword") String keyword) {
+          List<Group> groups = groupRepository.getGroupsByKeyword(keyword);
+          return groups != null ?
+                  new Response(true, "result", groups) :
+                  new Response(false, "error_msg", Error.GetGroupListByKeywordFailed.getMsg());
     }
 
     @GetMapping("/group/{id}/member")
