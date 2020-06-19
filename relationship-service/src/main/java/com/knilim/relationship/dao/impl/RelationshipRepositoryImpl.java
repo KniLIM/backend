@@ -59,7 +59,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             pushService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            fName
+                            fName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
