@@ -1,14 +1,16 @@
 package com.knilim.data.model;
 
+import org.springframework.data.annotation.Id;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Group implements Serializable {
+    @Id
+    private UUID id;
 
-    private String id;
-
-    private String owner;
+    private UUID owner;
 
     private String name;
 
@@ -18,38 +20,27 @@ public class Group implements Serializable {
 
     private String announcement;
 
-    private String createdAt;
+    private Timestamp created_at;
 
-    /**
-     * 这个构造方法不要删!!!有用的!
-     * @author loheagn
-     */
-    public Group(){}
-
-    public Group(String id, String owner, String name, String avatar,
-                 String signature, String announcement, String createdAt) {
-        this.id = id;
+    Group(UUID owner, String name){
         this.owner = owner;
         this.name = name;
-        this.avatar = avatar;
-        this.signature = signature;
-        this.announcement = announcement;
-        this.createdAt = createdAt;
+        this.id = UUID.randomUUID();
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public String getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(UUID owner) {
         this.owner = owner;
     }
 
@@ -85,11 +76,11 @@ public class Group implements Serializable {
         this.announcement = announcement;
     }
 
-    public String getCreated_at() {
-        return createdAt;
+    public Timestamp getCreated_at() {
+        return created_at;
     }
 
-    public void setCreated_at(String created_at) {
-        this.createdAt = created_at;
+    public void setCreated_at(Timestamp created_at) {
+        this.created_at = created_at;
     }
 }

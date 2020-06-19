@@ -1,14 +1,13 @@
 package com.knilim.service;
 
 import java.util.List;
+import java.util.UUID;
 import com.knilim.data.model.Group;
-import com.knilim.data.model.UserTmp;
-import com.knilim.data.utils.Tuple;
+import com.knilim.data.model.User;
 
 /**
- *  群组服务接口
+ *  群组服务RPC接口
  */
-
 public interface GroupService {
     /**
      *
@@ -18,12 +17,12 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      String groupId = UUID.randomUUID().toString();
+     *      UUID groupId = UUID.randomUUID();
      *      Group groupMsg = getGroupByGroupId(groupId);
      * }</pre></p>
      *
      */
-    Group getGroupByGroupId(String groupId);
+    Group getGroupByGroupId(UUID groupId);
 
     /**
      * 根据用户的user_id，返回该用户所在的群列表（进行适当冗余）
@@ -33,24 +32,26 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      String userId = UUID.randomUUID().toString();
+     *      UUID userId = UUID.randomUUID();
      *      ArrayList<Group> res = getGroupsByUserId(userId);
      * }</pre></p>
      *
      */
-    List<Group> getGroupsByUserId(String userId);
+    List<Group> getGroupsByUserId(UUID userId);
 
     /**
      * 根据群的id返回该群的所有用户列表（进行适当冗余）
-     * @param groupId 群id
-     * @return 一个临时的用于返回的UserTmp模型的list
+     * @param groupId 需要获取用户列表的群id
+     * @return 一个User对象的列表，包括该群的所有用户
+     *          结果进行适当冗余，每个User里包含的信息只有userId、memo、avatar
+     *
      * e.g.
-     * <p><pre>{@code
-     *      String groupId = UUID.randomUUID().toString();
-     *      ArrayList<UserTmp> res =  getMembersByGroupId(groupId);
+     * <p><pre>{
+     *      UUID groupOId = UUID.randomUUID();
+     *      ArrayList<User> res = getMembersByGroupId(groupId);
      * }</pre></p>
      */
-    List<UserTmp> getMembersByGroupId(String groupId);
+    List<User> getMembersByGroupId(UUID groupId);
 
     /**
      * 根据groupId得到所有群成员，然后查找在线数据库，将离线的用户和在线的用户分为两个列表。
@@ -64,25 +65,11 @@ public interface GroupService {
      *
      * e.g.
      * <p><pre>{@code
-     *      String groupId = UUID.randomUUID().toString();
+     *      UUID groupId = UUID.randomUUID();
      *      Byte[] msg = {};
-     *      ArrayList<String> onlineUser = sendGroupMsg(groupId, msg);
+     *      ArrayList<UUID> onlineUser = sendGroupMsg(groupId, msg);
      * }</pre></p>
      *
      */
-    List<String> sendGroupMsg(String groupId, Byte[] msg);
-
-    /**
-     * 根据userId得到该用户所有的群列表，然后根据这些群id得到所有群的成员，并一起返回，结果进行适当冗余。
-     * @param userId 需要获取群列表的userId
-     * @return  一个Tuple的List，first是群组对象，second是一个User的List
-     *
-     * e.g.
-     * <p><pre>{@code
-     *      String userId = UUID.randomUUID().toString();
-     *      ArrayList<Tuple<Group, ArrayList<User>>> res = getGroupsAndMembersByUserId(String userId);
-     * }
-     *
-     */
-    List<Tuple<Group, List<UserTmp>>> getGroupsAndMembersByUserId(String userId);
+    List<UUID> sendGroupMsg(UUID groupId, Byte[] msg);
 }
