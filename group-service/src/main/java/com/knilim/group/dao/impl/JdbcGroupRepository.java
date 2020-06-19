@@ -127,16 +127,17 @@ public class JdbcGroupRepository implements GroupRepository {
     @Override
     public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
-                "select * from IM.group where name like ? or signature like ?",
+                "select * from IM.group as g, IM.user as u " +
+                        "where g.owner = u.id and (name like ? or signature like ?)",
                 new Object[]{"%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
-                                rs.getString("id"),
-                                rs.getString("owner"),
-                                rs.getString("name"),
-                                rs.getString("avatar"),
-                                rs.getString("signature"),
-                                rs.getString("announcement"),
+                                rs.getString("g.id"),
+                                rs.getString("u.nickname"),
+                                rs.getString("g.name"),
+                                rs.getString("g.avatar"),
+                                rs.getString("g.signature"),
+                                rs.getString("g.announcement"),
                                 new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
                                         (rs.getTimestamp("created_at"))
                         )
