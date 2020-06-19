@@ -81,10 +81,11 @@ public class AccountController {
             if (password == null) return Util.loginError(Error.NoPassword);
 
             // 验证登录信息
-            if (!accountRepository.checkPassword(account, password)) return Util.loginError(Error.PasswordError);
             User user;
             if (account.contains("@")) user = accountRepository.getUserByEmail(account);
             else user = accountRepository.getUserByPhone(account);
+            if(user == null) return Util.loginError(Error.NoSuchAccount);
+            if(!user.getPassWord().equals(password)) return Util.loginError(Error.PasswordError);
             String userId = user.getId();
             JSONObject resultUser = JSONObject.parseObject(JSONObject.toJSONString(user));
             resultUser.remove("passWord");

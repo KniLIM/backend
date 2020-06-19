@@ -49,7 +49,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
                 pushService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            "用户 " + fName +" 已通过您的好友申请！",
+                            fName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
                  );
             return true;
@@ -59,7 +59,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             pushService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            "用户 " + fName +" 未通过您的好友申请！",
+                            fName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
@@ -77,7 +77,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             pushService.addNotification(uid,
                     new Notification(
                             friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
-                            "您的好友 " + friendship.getNickname() + " 已删除与您的好友关系！",
+                            friendship.getNickname(),
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
@@ -127,7 +127,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         pushService.addNotification(useId,
                 new Notification(
                         friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
-                        "用户 " + uName + " 申请添加您为好友，申请说明\n" + instruction,
+                        String.format("%s,%s", uName, instruction),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
     }
