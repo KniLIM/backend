@@ -87,6 +87,8 @@ public class AccountController {
             if(user == null) return Util.loginError(Error.NoSuchAccount);
             if(!user.getPassWord().equals(password)) return Util.loginError(Error.PasswordError);
             String userId = user.getId();
+            JSONObject resultUser = JSONObject.parseObject(JSONObject.toJSONString(user));
+            resultUser.remove("passWord");
 
             // 选取合适的session server
             Tuple<String, Integer> ipPort = forwardService.getAvailableSession();
@@ -107,7 +109,7 @@ public class AccountController {
             // 拉取离线消息
             List<Byte[]>  offlineMessages = offlineService.getOfflineMsgs(user.getId());
 
-            return Util.loginSuccess(user, friends, groups, ipPort, offlineMessages, token);
+            return Util.loginSuccess(resultUser, friends, groups, ipPort, offlineMessages, token);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
         }
@@ -211,7 +213,7 @@ class Util {
         return new Response(false, new Tuple<>("msg", error.getMsg()));
     }
     static Response modifySuccess(String id) { return new Response(true, new Tuple<>("user_id", id)); }
-    static Response loginSuccess(User user, List<JSONObject> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages, String token) {
+    static Response loginSuccess(JSONObject user, List<JSONObject> friends, List<Group> groups, Tuple<String,Integer> ipPort, List<Byte[]> messages, String token) {
         return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort), new Tuple<>("offlineMessages", messages), new Tuple<>("token", token));
     }
     static Response searchSuccess(User user) {return new Response(true,new Tuple<>("self",user));}
