@@ -62,7 +62,7 @@ public class JdbcGroupRepository implements GroupRepository {
             pushService.addNotification(user,
                     new Notification(
                             groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
-                            group.getName() + " 群聊已经解散！",
+                            group.getName(),
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
         }
@@ -127,16 +127,17 @@ public class JdbcGroupRepository implements GroupRepository {
     @Override
     public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
-                "select * from IM.group where name like ? or signature like ?",
+                "select * from IM.group as g, IM.user as u " +
+                        "where g.owner = u.id and (name like ? or signature like ?)",
                 new Object[]{"%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
-                                rs.getString("id"),
-                                rs.getString("owner"),
-                                rs.getString("name"),
-                                rs.getString("avatar"),
-                                rs.getString("signature"),
-                                rs.getString("announcement"),
+                                rs.getString("g.id"),
+                                rs.getString("u.nickname"),
+                                rs.getString("g.name"),
+                                rs.getString("g.avatar"),
+                                rs.getString("g.signature"),
+                                rs.getString("g.announcement"),
                                 new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
                                         (rs.getTimestamp("created_at"))
                         )
@@ -178,8 +179,7 @@ public class JdbcGroupRepository implements GroupRepository {
         pushService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
-                        user.getNickName() + "想要加入群聊：" + group.getName() + "。\n" +
-                                "说明：" + comment,
+                        String.format("%s,%s,%s",user.getNickName(),group.getName(),comment),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return false;
@@ -198,7 +198,7 @@ public class JdbcGroupRepository implements GroupRepository {
             pushService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
-                            "您已加入群聊：" + groupName,
+                            "yes," + groupName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             // 将该用户添加到群组关系表
@@ -211,7 +211,7 @@ public class JdbcGroupRepository implements GroupRepository {
             pushService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
-                            "您被拒绝加入群聊：" + groupName,
+                            "no," + groupName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
@@ -236,7 +236,7 @@ public class JdbcGroupRepository implements GroupRepository {
         pushService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_WITHDRAW_RESULT,
-                        user.getNickName() + "已经退出群聊：" + group.getName(),
+                        user.getNickName() + "," + group.getName(),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
@@ -256,7 +256,7 @@ public class JdbcGroupRepository implements GroupRepository {
         pushService.addNotification(userId,
                 new Notification(
                         userId, group.getOwner(), NotificationType.N_GROUP_KICKOFF_RESULT,
-                        "您被踢出群聊：" + group.getName(),
+                        group.getName(),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
