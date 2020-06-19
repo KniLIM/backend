@@ -12,9 +12,12 @@ import com.knilim.data.utils.DeviceUtil;
 import com.knilim.service.OfflineService;
 import com.knilim.service.OnlineService;
 import com.knilim.service.PushService;
+import com.knilim.session.controller.ForwardController;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
 import com.knilim.session.data.DH;
+import com.knilim.session.data.MsgProto;
+import com.knilim.session.model.Connect;
 import org.apache.dubbo.config.annotation.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +43,8 @@ public class ConnectHandler {
     @Reference
     private OfflineService offlineService;
 
-//    @Reference
-//    private PushService pushService;
+    @Reference
+    private PushService pushService;
 
     @Resource
     private ClientDao localRedis;
@@ -49,22 +54,19 @@ public class ConnectHandler {
         this.nps = server.getNamespace("/sockets");
         nps.addConnectListener(onConnect());
         nps.addDisconnectListener(onDisConnect());
-//        nps.addEventListener("connect-ack",void.class,onConnectAck());
+        nps.addEventListener("hello", byte[].class, onHello());
     }
 
     /**
      * 监听 connect 事件并触发相应回调事件：
      * 1. check token ，成功转下条，失败触发 connect-error
      * 2. 生成密钥 {@link DH#initSecretKey(String clientKey)} ， 成功触发 转下条 ，失败触发 connect-error
-     * 3. local redis记录
-     * 4. 离线消息
-     * 5. 可能有离线通知
+     * 3. hello
      */
     private ConnectListener onConnect() {
         // 返回事件为  connect-error connect-ack
         return socketIOClient -> {
             HandshakeData handshake = socketIOClient.getHandshakeData();
-            String hello = handshake.getSingleUrlParam("hello");
             String clientKey = handshake.getSingleUrlParam("clientKey");
             String token = handshake.getSingleUrlParam("token");
             String userId = handshake.getSingleUrlParam("userId");
@@ -78,33 +80,14 @@ public class ConnectHandler {
             } else {
                 // init key
                 String key = DH.initSecretKey(clientKey);
-                String decryptData = new String(AESEncryptor.decrypt(hello.getBytes(), key));
-
-                // check key for decry ping
-                if (decryptData.equals("hello")) {
-                    localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
-                            handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
-                            clientKey);
-                    List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
-//                    List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
-//                    if (offlineMsgs != null && pushMsgs != null
-//                            && !offlineMsgs.isEmpty() && !pushMsgs.isEmpty()) {
-//                        socketIOClient.sendEvent("connect-ack", offlineMsgs, pushMsgs);
-//                    } else if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
-//                        socketIOClient.sendEvent("connect-ack", offlineMsgs);
-//                    } else if (pushMsgs != null && !pushMsgs.isEmpty()) {
-//                        socketIOClient.sendEvent("connect-ack", pushMsgs);
-//                    } else {
-//                        socketIOClient.sendEvent("connect-ack");
-//                    }
-                    if (offlineMsgs != null
-                            && !offlineMsgs.isEmpty()) {
-                        socketIOClient.sendEvent("connect-ack", offlineMsgs);
-                    } else {
-                        socketIOClient.sendEvent("connect-ack");
-                    }
+                localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
+                        handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
+                        key);
+                if (localRedis.getKey(userId, device) != null) {
+                    String hello = Arrays.toString(AESEncryptor.encrypt("hello".getBytes(), key));
+                    socketIOClient.sendEvent("connect-ack", hello);
                 } else {
-                    socketIOClient.sendEvent("connect-error", "key error");
+                    socketIOClient.sendEvent("connect-error", "key init error");
                     socketIOClient.disconnect();
                 }
             }
@@ -120,20 +103,55 @@ public class ConnectHandler {
         };
     }
 
-//    /**
-//     * Client 准备好了密钥，确认连接成功
-//     * 逻辑续 {@link #onConnect()}
-//     * 3. local redis记录
-//     * 4. 离线消息
-//     * 5. 可能有离线通知
-//     *
-//     * @return 离线消息
-//     */
-//    private DataListener<Void> onConnectAck() {
-//        return (socketIOClient, aVoid, ackRequest) -> {
-//            onlineService.addOnlineDevice();
-//
-//           socketIOClient.sendEvent("disconnect","error info");
-//        }
-//    }
+    /**
+     * Client 准备好了密钥，发送hello消息，确认连接成功
+     * 逻辑续 {@link #onConnect()}
+     * 3. local redis记录
+     * 4. 离线消息
+     * 5. 可能有离线通知
+     *
+     * @return 离线消息
+     */
+    private DataListener<byte[]> onHello() {
+        return (socketIOClient, data, ackRequest) -> {
+            HandshakeData handshake = socketIOClient.getHandshakeData();
+            String userId = handshake.getSingleUrlParam("userId");
+            Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
+            String token = handshake.getSingleUrlParam("token");
+
+            Connect connect = localRedis.getConnect(userId, device);
+
+            byte[] decryptData = AESEncryptor.decrypt(data, localRedis.getKey(userId, device));
+            // check key for decry ping
+            if (Arrays.equals(decryptData, "hello".getBytes())) {
+                String host = InetAddress.getLocalHost().getHostAddress();
+                onlineService.addOnlineDevice(userId, device, token, host, 9986);
+
+                List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
+                    List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
+                    if (offlineMsgs != null && pushMsgs != null
+                            && !offlineMsgs.isEmpty() && !pushMsgs.isEmpty()) {
+                        ackRequest.sendAckData(offlineMsgs);
+                        for (Notification pushMsg:pushMsgs) {
+                            pushService.addNotification(userId,pushMsg);
+                        }
+                    } else if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
+                        socketIOClient.sendEvent("connect-ack", offlineMsgs);
+                    } else if (pushMsgs != null && !pushMsgs.isEmpty()) {
+                        for (Notification pushMsg:pushMsgs) {
+                            pushService.addNotification(userId,pushMsg);
+                        }
+                        socketIOClient.sendEvent("connect-ack");
+                    } else {
+                        socketIOClient.sendEvent("connect-ack");
+                    }
+                if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
+                    ackRequest.sendAckData(offlineMsgs);
+                }
+            } else {
+                socketIOClient.sendEvent("connect-error","hello error , it means key change error");
+                socketIOClient.disconnect();
+            }
+        };
+    }
 }
