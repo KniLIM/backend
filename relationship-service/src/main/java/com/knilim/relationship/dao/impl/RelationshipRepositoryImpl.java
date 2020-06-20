@@ -165,6 +165,28 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             return null;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Friendship> getFriendsByUserIdRPC(String uid) {
+        try {
+            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+                    new Object[]{uid},
+                    (RowMapper) (rs, rowNum) -> {
+                        Friendship friendship  = new Friendship();
+                        friendship.setUid(rs.getString("uid"));
+                        friendship.setFriend(rs.getString("friend"));
+                        friendship.setNickname(rs.getString("nickname"));
+                        friendship.setIsBlack(rs.getBoolean("is_black"));
+                        friendship.setIsTop(rs.getBoolean("is_top"));
+                        friendship.setCreatedAt(rs.getString("created_at"));
+                        return friendship;
+                    });
+        }catch (DataAccessException e){
+            return null;
+        }
+    }
+
     @Override
     public void addApplication(String friendId, String useId, String uName, String instruction){
         pushService.addNotification(useId,
