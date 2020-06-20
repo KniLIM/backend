@@ -24,7 +24,7 @@ public class RelationshipController {
     @PostMapping("/friend/application")
     public Response createApplication(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         String uName = params.getString("u_name");
         String instruction = params.getString("instruction");
@@ -38,7 +38,7 @@ public class RelationshipController {
     @PatchMapping("/friend/application")
     public Response createRelationship(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         String fName = params.getString("f_name");
         Boolean state = params.getBoolean("state");
@@ -50,7 +50,7 @@ public class RelationshipController {
     @DeleteMapping("/friend/")
     public Response deleteRelationship(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         if(relationshipRepository.delete(useId, friendId)){
             return new Response(true, "result", null);
@@ -61,7 +61,7 @@ public class RelationshipController {
     @PatchMapping("/friend/nickname")
     public Response patchNickname(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         String nickname = params.getString("nickname");
         Friendship friendship = relationshipRepository.updateNickname(useId, friendId, nickname);
@@ -73,7 +73,7 @@ public class RelationshipController {
     @PatchMapping("/friend/top")
     public Response patchIsTop(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         Boolean isTop = params.getBoolean("is_top");
         Friendship friendship = relationshipRepository.updateIsTop(useId, friendId, isTop);
@@ -85,7 +85,7 @@ public class RelationshipController {
     @PatchMapping("/friend/black")
     public Response patchIsBlack(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
-        String useId = params.getString("use_id");
+        String useId = params.getString("user_id");
         String friendId = params.getString("friend_id");
         Boolean isBlack = params.getBoolean("is_black");
         Friendship friendship = relationshipRepository.updateIsBlack(useId, friendId, isBlack);
