@@ -49,12 +49,13 @@ public class GroupServiceImpl implements GroupService {
     public List<Group> getGroupsByUserId(String userId) {
         try {
             return jdbcTemplate.query(
-                    "select * from IM.group as a, IM.groupship as b where a.id = b.gid and b.uid = ?",
+                    "select * from IM.group as a, IM.groupship as b , IM.user as u" +
+                            "where a.id = b.gid and b.uid = ? and a.owner = u.id",
                     new Object[]{userId},
                     (rs, rowNum) ->
                             new Group(
                                     rs.getString("a.id"),
-                                    rs.getString("a.owner"),
+                                    rs.getString("u.nickname"),
                                     rs.getString("a.name"),
                                     rs.getString("a.avatar"),
                                     rs.getString("a.signature"),
