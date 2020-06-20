@@ -95,7 +95,12 @@ public class JdbcGroupRepository implements GroupRepository {
         // 获取该群最新的所有信息
         try {
             String sql2 = String.format("select * from IM.group where id = '%s'", groupId);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Group.class));
+            Group group =  jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Group.class));
+            assert group != null;
+            String sql3 = String.format("select * from IM.user where id = '%s'", group.getOwner());
+            String nickName = jdbcTemplate.queryForObject(sql3, new BeanPropertyRowMapper<>(String.class));
+            group.setOwner(nickName);
+            return group;
         } catch (DataAccessException e) {
             return null;
         }
