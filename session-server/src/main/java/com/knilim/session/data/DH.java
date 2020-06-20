@@ -119,23 +119,4 @@ public class DH {
     }
 
 
-    /**
-     * 根据前端传输过来的 {@code clientPublicKey} 生成本地 密钥
-     *
-     * @param clientPublicKey 客户端公钥
-     * @return String 服务器端密钥 或 错误
-     */
-    public static String initSecretKey(String clientPublicKey){
-        try {
-            byte[] clientKey = clientPublicKey.getBytes();
-            Map<String, Object> keyMap = initKey(clientKey);
-            byte[] secretKey = getSecretKey(getPublicKey(keyMap),getPrivateKey(keyMap));
-            String key = new String(secretKey);
-            logger.debug(key);
-            return key;
-        }catch (Exception e) {
-            logger.error(e.getMessage());
-            return "error";
-        }
-    }
 }

@@ -26,6 +26,9 @@ import javax.annotation.Resource;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import static com.knilim.session.data.DH.*;
 
 @Component
 public class ConnectHandler {
@@ -56,7 +59,7 @@ public class ConnectHandler {
     /**
      * 监听 connect 事件并触发相应回调事件：
      * 1. check token ，成功转下条，失败触发 connect-error
-     * 2. 生成密钥 {@link DH#initSecretKey(String clientKey)} ， 成功触发 转下条 ，失败触发 connect-error
+     * 2. 生成密钥 initKey ， 成功触发 转下条 ，失败触发 connect-error
      * 3. hello
      */
     private ConnectListener onConnect() {
@@ -75,16 +78,24 @@ public class ConnectHandler {
                 socketIOClient.disconnect();
             } else {
                 // init key
-                String key = DH.initSecretKey(clientKey);
-                localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
-                        handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
-                        key);
-                if (localRedis.getKey(userId, device) != null) {
-                    String hello = Arrays.toString(AESEncryptor.encrypt("hello".getBytes(), key));
-                    socketIOClient.sendEvent("connect-ack", hello);
-                } else {
-                    socketIOClient.sendEvent("connect-error", "key init error");
-                    socketIOClient.disconnect();
+                logger.info("key[{}]", clientKey);
+                try {
+                    Map<String, Object> keyMap = initKey(clientKey.getBytes());
+                    logger.debug(keyMap.toString());
+                    byte[] key = getSecretKey(clientKey.getBytes(),getPrivateKey(keyMap));
+                    localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
+                            handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
+                            Arrays.toString(key));
+                    if (localRedis.getKey(userId, device) != null) {
+                        String hello = Arrays.toString(AESEncryptor.encrypt("hello".getBytes(), Arrays.toString(key)));
+                        logger.info("primary final key[{}]", key);
+                        socketIOClient.sendEvent("connect-ack", hello,getPublicKey(keyMap));
+                    } else {
+                        socketIOClient.sendEvent("connect-error", "key init error");
+                        socketIOClient.disconnect();
+                    }
+                }catch (Exception e) {
+                    logger.error(e.getMessage());
                 }
             }
         };
@@ -114,8 +125,6 @@ public class ConnectHandler {
             String userId = handshake.getSingleUrlParam("userId");
             Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
             String token = handshake.getSingleUrlParam("token");
-
-            Connect connect = localRedis.getConnect(userId, device);
 
             byte[] decryptData = AESEncryptor.decrypt(data, localRedis.getKey(userId, device));
             // check key for decry ping
