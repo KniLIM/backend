@@ -71,6 +71,14 @@ public interface RelationshipRepository {
      */
     List<tempFriend> getFriendsByUserId(String uid);
 
+
+    /**
+     * 根据用户id返回好友列表
+     * @param uid 用户id
+     * @return 该用户的好友列表
+     */
+    List<Friendship> getFriendsByUserIdRPC(String uid);
+
     /**
      * 添加好友申请
      * @param friendId 被申请人id
