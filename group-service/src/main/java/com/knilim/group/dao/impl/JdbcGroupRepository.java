@@ -179,7 +179,7 @@ public class JdbcGroupRepository implements GroupRepository {
         pushService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
-                        String.format("%s,%s,%s",user.getNickName(),group.getName(),comment),
+                        String.format("%s,%s,%s,%s",user.getNickName(),group.getName(),comment,group.getId()),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return false;
