@@ -7,6 +7,7 @@ import com.knilim.relationship.utils.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.alibaba.fastjson.JSONObject;
+import com.knilim.relationship.dao.impl.tempFriend;
 
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class RelationshipController {
         String useId = params.getString("use_id");
         String friendId = params.getString("friend_id");
         String nickname = params.getString("nickname");
-        Friendship friendship = relationshipRepository.update(useId, friendId, nickname, null, null);
+        Friendship friendship = relationshipRepository.updateNickname(useId, friendId, nickname);
         return friendship != null ?
                 new Response(true, "result", friendship) :
                 new Response(false, "error_msg", Error.UpdateFailed.getMsg());
@@ -75,7 +76,7 @@ public class RelationshipController {
         String useId = params.getString("use_id");
         String friendId = params.getString("friend_id");
         Boolean isTop = params.getBoolean("is_top");
-        Friendship friendship = relationshipRepository.update(useId, friendId, null, isTop, null);
+        Friendship friendship = relationshipRepository.updateIsTop(useId, friendId, isTop);
         return friendship != null ?
                 new Response(true, "result", friendship) :
                 new Response(false, "error_msg", Error.UpdateFailed.getMsg());
@@ -87,7 +88,7 @@ public class RelationshipController {
         String useId = params.getString("use_id");
         String friendId = params.getString("friend_id");
         Boolean isBlack = params.getBoolean("is_black");
-        Friendship friendship = relationshipRepository.update(useId, friendId, null, null, isBlack);
+        Friendship friendship = relationshipRepository.updateIsBlack(useId, friendId, isBlack);
         return friendship != null ?
                 new Response(true, "result", friendship) :
                 new Response(false, "error_msg", Error.UpdateFailed.getMsg());
@@ -95,7 +96,7 @@ public class RelationshipController {
 
     @GetMapping("/friend/{id}")
     public Response getFriendList(@PathVariable(value = "id") String userId) {
-            List<Friendship> friends = relationshipRepository.getFriendsByUserId(userId);
+            List<tempFriend> friends = relationshipRepository.getFriendsByUserId(userId);
             return friends != null ?
                     new Response(true, "result", friends) :
                     new Response(false, "error_msg", Error.GetFriendListFailed.getMsg());
