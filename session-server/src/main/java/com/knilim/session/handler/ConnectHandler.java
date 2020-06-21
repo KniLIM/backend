@@ -141,6 +141,7 @@ public class ConnectHandler {
             logger.info("onLeave : user[{}] logout ,leave ",userId);
             localRedis.removeConnect(userId, device);
             onlineService.removeOnlineDevice(userId,device);
+            client.disconnect();
         };
     }
 

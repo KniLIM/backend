@@ -4,6 +4,8 @@ import com.knilim.data.model.DeviceInfo;
 import com.knilim.data.utils.Device;
 import com.knilim.service.OnlineService;
 import org.apache.dubbo.config.annotation.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import java.util.Map;
 @Component
 @Service
 public class OnlineServiceImpl implements OnlineService {
+    private static final Logger logger = LoggerFactory.getLogger(OnlineServiceImpl.class);
 
     @Resource
     private RedisTemplate<String, HashMap<Device, DeviceInfo>> template;
@@ -34,7 +37,7 @@ public class OnlineServiceImpl implements OnlineService {
     public boolean checkToken(String userId, Device device, String token) {
         BoundHashOperations<String, Device, DeviceInfo> op = template.boundHashOps(userId);
         DeviceInfo info = op.get(device);
-
+        logger.info("checkToken : user:[{}] device:[{}] token:[{}] \n should be  \n info[{}]",userId,device,token,info);
         if (info == null) {
             return false;
         }
