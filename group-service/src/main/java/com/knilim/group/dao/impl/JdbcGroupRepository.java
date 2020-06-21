@@ -6,27 +6,24 @@ import com.knilim.data.model.User;
 import com.knilim.data.utils.NotificationType;
 import com.knilim.group.dao.GroupRepository;
 import com.knilim.data.model.UserTmp;
-import com.knilim.service.PushService;
+import com.knilim.service.ForwardService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class JdbcGroupRepository implements GroupRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Reference
-    private PushService pushService;
+    private ForwardService forwardService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -59,7 +56,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         assert group != null;
         for (String user : users) {
-            pushService.addNotification(user,
+            forwardService.addNotification(user,
                     new Notification(
                             groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
                             group.getName(),
@@ -204,7 +201,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         // 向群主发送消息推送
         assert group != null && user != null;
-        pushService.addNotification(group.getOwner(),
+        forwardService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
                         String.format("%s,%s,%s,%s",user.getNickName(),group.getName(),comment,group.getId()),
@@ -223,7 +220,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         if (state.equals("yes")) {
             // 向该用户发送加群成功通知
-            pushService.addNotification(userId,
+            forwardService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
                             "yes," + groupName,
@@ -236,7 +233,7 @@ public class JdbcGroupRepository implements GroupRepository {
             ) == 1;
         } else if (state.equals("no")) {
             // 向该用户发送加群失败通知
-            pushService.addNotification(userId,
+            forwardService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
                             "no," + groupName,
@@ -261,7 +258,7 @@ public class JdbcGroupRepository implements GroupRepository {
                 new BeanPropertyRowMapper<>(User.class)
         );
         assert group != null && user != null;
-        pushService.addNotification(group.getOwner(),
+        forwardService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_WITHDRAW_RESULT,
                         user.getNickName() + "," + group.getName(),
@@ -281,7 +278,7 @@ public class JdbcGroupRepository implements GroupRepository {
                 new BeanPropertyRowMapper<>(Group.class)
         );
         assert group != null;
-        pushService.addNotification(userId,
+        forwardService.addNotification(userId,
                 new Notification(
                         userId, group.getOwner(), NotificationType.N_GROUP_KICKOFF_RESULT,
                         group.getName(),

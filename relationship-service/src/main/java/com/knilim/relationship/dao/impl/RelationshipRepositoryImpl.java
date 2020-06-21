@@ -4,6 +4,7 @@ import com.knilim.data.model.Friendship;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.NotificationType;
 import com.knilim.relationship.dao.RelationshipRepository;
+import com.knilim.service.ForwardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Reference;
@@ -11,8 +12,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import com.knilim.service.PushService;
-import com.knilim.relationship.dao.impl.tempFriend;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +24,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Reference
-    private PushService pushService;
+    private ForwardService forwardService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -49,7 +48,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
             //发送成功通知
             if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
-                pushService.addNotification(friend,
+                forwardService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
                             "yes," + fName,
@@ -59,7 +58,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             } else return false;
         }else {
             //发送失败通知
-            pushService.addNotification(friend,
+            forwardService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
                             "no," + fName,
@@ -77,7 +76,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
         if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
             //发送删除好友通知
-            pushService.addNotification(uid,
+            forwardService.addNotification(uid,
                     new Notification(
                             friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
                             friendship.getNickname(),
@@ -189,7 +188,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
     @Override
     public void addApplication(String friendId, String useId, String uName, String instruction){
-        pushService.addNotification(useId,
+        forwardService.addNotification(useId,
                 new Notification(
                         friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
                         String.format("%s,%s", uName, instruction),
