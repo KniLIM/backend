@@ -72,9 +72,23 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public Group getInfo(String groupId) throws DataAccessException {
-        String sql = String.format("select * from IM.group where id = '%s'", groupId);
         try {
-            return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Group.class));
+            return jdbcTemplate.queryForObject(
+                    "select * from IM.group as g, IM.user as u " +
+                            "where g.owner = u.id and g.id = ?",
+                    new Object[]{groupId},
+                    (rs, rowNum) ->
+                            new Group(
+                                    rs.getString("g.id"),
+                                    rs.getString("u.nickname"),
+                                    rs.getString("g.name"),
+                                    rs.getString("g.avatar"),
+                                    rs.getString("g.signature"),
+                                    rs.getString("g.announcement"),
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
+                            )
+            );
         } catch (DataAccessException e) {
             return null;
         }
@@ -94,8 +108,22 @@ public class JdbcGroupRepository implements GroupRepository {
         if (jdbcTemplate.update(sql1) != 1) return null;
         // 获取该群最新的所有信息
         try {
-            String sql2 = String.format("select * from IM.group where id = '%s'", groupId);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Group.class));
+            return jdbcTemplate.queryForObject(
+                    "select * from IM.group as g, IM.user as u " +
+                            "where g.owner = u.id and g.id = ?",
+                    new Object[]{groupId},
+                    (rs, rowNum) ->
+                            new Group(
+                                    rs.getString("g.id"),
+                                    rs.getString("u.nickname"),
+                                    rs.getString("g.name"),
+                                    rs.getString("g.avatar"),
+                                    rs.getString("g.signature"),
+                                    rs.getString("g.announcement"),
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
+                            )
+            );
         } catch (DataAccessException e) {
             return null;
         }
@@ -179,7 +207,7 @@ public class JdbcGroupRepository implements GroupRepository {
         pushService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
-                        String.format("%s,%s,%s",user.getNickName(),group.getName(),comment),
+                        String.format("%s,%s,%s,%s",user.getNickName(),group.getName(),comment,group.getId()),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return false;

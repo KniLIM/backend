@@ -12,10 +12,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import com.knilim.service.PushService;
+import com.knilim.relationship.dao.impl.tempFriend;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+
 
 @Repository
 public class RelationshipRepositoryImpl implements RelationshipRepository {
@@ -38,18 +41,18 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     public boolean insert(String uid, String friend, String fName, Boolean state) {
         if(state){
             //好友表插正反两个
-            String sql1 = String.format("insert into IM.friendship" +
-                    "(uid, friend, ) values ('%s, '%s')", uid, friend);
+            String sql1 = String.format("insert into IM.friendship " +
+                    "(uid, friend) values ('%s, '%s')", uid, friend);
 
-            String sql2 = String.format("insert into IM.friendship" +
-                    "(uid, friend, ) values ('%s, '%s')", friend, uid);
+            String sql2 = String.format("insert into IM.friendship " +
+                    "(uid, friend) values ('%s, '%s')", friend, uid);
 
             //发送成功通知
             if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
                 pushService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            fName,
+                            "yes," + fName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
                  );
             return true;
@@ -59,7 +62,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             pushService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            fName,
+                            "no," + fName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
@@ -88,9 +91,9 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     public Friendship update(String uid, String friend, String nickname, Boolean isTop, Boolean isBlack) {
         if(uid == null || friend == null) return null;
         String plugin = "";
-        if (nickname != null) plugin += String.format(", nickname = '%s'", nickname);
-        if (isTop != null) plugin += String.format(", isTop = '%s'", isTop);
-        if (isBlack != null) plugin += String.format(", isBlack = '%s'", isBlack);
+        if (nickname != null) plugin += String.format("nickname = '%s'", nickname);
+        if (isTop != null) plugin += String.format("isTop = '%s'", isTop);
+        if (isBlack != null) plugin += String.format("isBlack = '%s'", isBlack);
         plugin = plugin.substring(1);
         String sql1 = String.format("update table IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
         try {
@@ -102,9 +105,70 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         }
     }
 
+    @Override
+    public Friendship updateNickname(String uid, String friend, String nickname) {
+        if(uid == null || friend == null) return null;
+        String sql1 = String.format("update table IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
+        try {
+            if (jdbcTemplate.update(sql1) != 1) return null;
+            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
+            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Friendship updateIsTop(String uid, String friend, Boolean isTop) {
+        if(uid == null || friend == null) return null;
+        String sql1 = String.format("update table IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
+        try {
+            if (jdbcTemplate.update(sql1) != 1) return null;
+            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
+            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Friendship updateIsBlack(String uid, String friend, Boolean isBlack) {
+        if(uid == null || friend == null) return null;
+        String sql1 = String.format("update table IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
+        try {
+            if (jdbcTemplate.update(sql1) != 1) return null;
+            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
+            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    public List<Friendship> getFriendsByUserId(String uid) {
+    public List<tempFriend> getFriendsByUserId(String uid) {
+        try {
+            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+                    new Object[]{uid},
+                    (RowMapper) (rs, rowNum) -> {
+                        tempFriend friendship  = new tempFriend();
+                        friendship.setUid(rs.getString("uid"));
+                        friendship.setFriend(rs.getString("friend"));
+                        friendship.setNickname(rs.getString("nickname"));
+                        friendship.setIsBlack(rs.getBoolean("is_black"));
+                        friendship.setIsTop(rs.getBoolean("is_top"));
+                        friendship.setCreatedAt(rs.getString("created_at"));
+                        friendship.setAvatar(rs.getString("avatar"));
+                        return friendship;
+                    });
+        }catch (DataAccessException e){
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
             return jdbcTemplate.query("select * from IM.friendship where uid = ?",
                     new Object[]{uid},
@@ -122,6 +186,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             return null;
         }
     }
+
     @Override
     public void addApplication(String friendId, String useId, String uName, String instruction){
         pushService.addNotification(useId,
@@ -132,4 +197,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         );
     }
 
+
+
+    
 }
