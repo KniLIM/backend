@@ -69,7 +69,7 @@ public class MsgHandler {
                 // 发送消息
                 sendMsgToRcv(msg.getReceiver(), msg.getMsgType(), decryptedContent);
                 // 在线设备消息同步
-                syncMsgAmongDevices(msg.getSender(), decryptedContent, client.getSessionId().toString());
+//                syncMsgAmongDevices(msg.getSender(), decryptedContent, client.getSessionId().toString());
             } catch (InvalidProtocolBufferException e) {
                 ackSender.sendAckData("send-error");
                 logger.error(e.getMessage());
