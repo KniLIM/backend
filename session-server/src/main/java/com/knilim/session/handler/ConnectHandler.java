@@ -9,9 +9,11 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
 import com.knilim.data.utils.DeviceUtil;
+import com.knilim.service.ForwardService;
 import com.knilim.service.OfflineService;
 import com.knilim.service.OnlineService;
 import com.knilim.service.PushService;
+import com.knilim.session.ForwardServiceImpl;
 import com.knilim.session.dao.ClientDao;
 import com.knilim.session.data.AESEncryptor;
 import com.knilim.session.data.DH;
@@ -45,6 +47,9 @@ public class ConnectHandler {
 
     @Reference
     private PushService pushService;
+
+    @Resource
+    private ForwardServiceImpl forwardService;
 
     @Resource
     private ClientDao localRedis;
@@ -144,13 +149,13 @@ public class ConnectHandler {
                     && !offlineMsgs.isEmpty() && !pushMsgs.isEmpty()) {
                 ackRequest.sendAckData(offlineMsgs);
                 for (Notification pushMsg : pushMsgs) {
-                    pushService.addNotification(userId, pushMsg);
+                    forwardService.addNotification(userId, pushMsg);
                 }
             } else if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
                 ackRequest.sendAckData(offlineMsgs);
             } else if (pushMsgs != null && !pushMsgs.isEmpty()) {
                 for (Notification pushMsg : pushMsgs) {
-                    pushService.addNotification(userId, pushMsg);
+                    forwardService.addNotification(userId, pushMsg);
                 }
                 ackRequest.sendAckData("hello");
             } else {
