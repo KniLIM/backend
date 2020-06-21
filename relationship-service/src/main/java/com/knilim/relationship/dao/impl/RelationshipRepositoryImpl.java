@@ -170,7 +170,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
-            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select * from IM.friendship where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         Friendship friendship  = new Friendship();
