@@ -121,7 +121,7 @@ public class ConnectHandler {
             HandshakeData handshake = socketIOClient.getHandshakeData();
             String userId = handshake.getSingleUrlParam("userId");
             Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
-            logger.info("Client[{}] userId[{}] disconnect", socketIOClient.getSessionId(), userId);
+            logger.info("onDisConnect : Client[{}] userId[{}] disconnect", socketIOClient.getSessionId(), userId);
             localRedis.removeConnect(userId, device);
             onlineService.disconnect(userId,device);
         };
@@ -138,9 +138,9 @@ public class ConnectHandler {
             HandshakeData handshake = client.getHandshakeData();
             String userId = handshake.getSingleUrlParam("userId");
             Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
+            logger.info("onLeave : user[{}] logout ,leave ",userId);
             localRedis.removeConnect(userId, device);
             onlineService.removeOnlineDevice(userId,device);
-            ;
         };
     }
 
@@ -169,25 +169,20 @@ public class ConnectHandler {
 
             List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
             List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
-            if (offlineMsgs != null && pushMsgs != null
-                    && !offlineMsgs.isEmpty() && !pushMsgs.isEmpty()) {
-                ackRequest.sendAckData(offlineMsgs);
+            if (pushMsgs != null && !pushMsgs.isEmpty()) {
                 for (Notification pushMsg : pushMsgs) {
                     forwardService.addNotification(userId, pushMsg);
                 }
+                logger.info("onHello : user[{}] get offline push and say hello",userId);
+                ackRequest.sendAckData("hello");
             } else if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
+                logger.info("onHello : user[{}] get offline msg :[{}] ",userId,offlineMsgs);
                 ackRequest.sendAckData(offlineMsgs);
-            } else if (pushMsgs != null && !pushMsgs.isEmpty()) {
-                for (Notification pushMsg : pushMsgs) {
-                    forwardService.addNotification(userId, pushMsg);
-                }
-                ackRequest.sendAckData("hello");
             } else {
+                logger.info("onHello : user[{}] get hello ",userId);
                 ackRequest.sendAckData("hello");
             }
-            if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
-                ackRequest.sendAckData(offlineMsgs);
-            }
+
 //            } else {
 //                socketIOClient.sendEvent("connect-error","hello error , it means key change error");
 //                socketIOClient.disconnect();

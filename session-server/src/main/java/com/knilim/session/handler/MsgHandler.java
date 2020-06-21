@@ -59,9 +59,9 @@ public class MsgHandler {
         logger.info("starting on send msg");
         return (client, data, ackSender) -> {
             try {
-                logger.info("data[{}] ",data);
+
                 RedundanceProto.Redundance msg = RedundanceProto.Redundance.parseFrom(data);
-                logger.info(msg.toString());
+                logger.info("onSendMsg : msg:[{}]",msg.toString());
                 ackSender.sendAckData("send-ack");
                 // 解密
                 String key = dao.getKey(msg.getSender(), DeviceUtil.fromString(msg.getDevice()));
@@ -69,7 +69,7 @@ public class MsgHandler {
                 // 发送消息
                 sendMsgToRcv(msg.getReceiver(), msg.getMsgType(), decryptedContent);
                 // 在线设备消息同步
-//                syncMsgAmongDevices(msg.getSender(), decryptedContent, client.getSessionId().toString());
+                syncMsgAmongDevices(msg.getSender(), decryptedContent, client.getSessionId().toString());
             } catch (InvalidProtocolBufferException e) {
                 ackSender.sendAckData("send-error");
                 logger.error(e.getMessage());
@@ -87,18 +87,19 @@ public class MsgHandler {
                 if (!thatSessionId.equals(thisSessionId)) {
                     String key = connect.getKey();
                     byte[] encrypted = AESEncryptor.encrypt(data, key);
+                    logger.info("syncMsgAmongDevices : send msg to User:[{}] sessionId:[{}]",userId,thatSessionId);
                     namespace.getClient(UUID.fromString(thatSessionId)).sendEvent("rcv-msg", encrypted);
                 }
             });
         }
 
-        // 处理连接其他 session 的 client
-        Map<Device, DeviceInfo> globalConnects = onlineService.getDevicesByUserId(userId);
-        if (globalConnects != null) {
-            Collection<DeviceInfo> globalDevices = globalConnects.values();
-            globalDevices.removeIf(device -> device.getSessionServerIp().equals(host));
-            httpForward(globalDevices, userId, data);
-        }
+//        // 处理连接其他 session 的 client 就一个 session
+//        Map<Device, DeviceInfo> globalConnects = onlineService.getDevicesByUserId(userId);
+//        if (globalConnects != null) {
+//            Collection<DeviceInfo> globalDevices = globalConnects.values();
+//            globalDevices.removeIf(device -> device.getSessionServerIp().equals(host));
+//            httpForward(globalDevices, userId, data);
+//        }
     }
 
     private void sendMsgToRcv(String rcv, RedundanceProto.Redundance.MsgType type, byte[] data) {
@@ -109,6 +110,7 @@ public class MsgHandler {
 //        }
 
         // 单聊
+        logger.info("sendMsgToRcv : msgType: 单聊");
         Map<Device, DeviceInfo> onlineRcv = onlineService.getDevicesByUserId(rcv);
         if (onlineRcv == null) {
             // offline
@@ -122,12 +124,11 @@ public class MsgHandler {
     private void httpForward(Collection<DeviceInfo> devices, String rcvId, byte[] data) {
         Map<Device, Connect> connects = dao.getConnectsByUserId(rcvId);
         if (connects != null) {
-            logger.info("send to connected device");
             connects.forEach((device, connect) -> {
                 String key = dao.getKey(rcvId, device);
                 byte[] encrypted = AESEncryptor.encrypt(data, key);
                 UUID sessionId = UUID.fromString(connect.getSessionId());
-                logger.info("ForwardController: forward to id:[{}] device:[{}]",rcvId,device);
+                logger.info("httpForward : forward to id:[{}] device:[{}]",rcvId,device);
                 namespace.getClient(sessionId).sendEvent("rcv-msg", encrypted);
             });
         } else {
