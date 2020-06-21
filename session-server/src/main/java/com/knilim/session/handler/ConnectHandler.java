@@ -135,7 +135,8 @@ public class ConnectHandler {
             // check key for decry ping
 //            if (Arrays.equals(decryptData, "hello".getBytes())) {
             String host = InetAddress.getLocalHost().getHostAddress();
-            onlineService.addOnlineDevice(userId, device, token, host, 9986);
+//            onlineService.addOnlineDevice(userId, device, token, host, 9986);
+            onlineService.connect(userId, device);
 
             List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
             List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);

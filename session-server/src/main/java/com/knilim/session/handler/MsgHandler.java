@@ -121,22 +121,18 @@ public class MsgHandler {
     }
 
     private void httpForward(Collection<DeviceInfo> devices, String rcvId, byte[] data) {
-        RestTemplate template = new RestTemplate();
-        Set<String> endpoints = new HashSet<>();
-
-        devices.forEach(device -> {
-            String ip = device.getSessionServerIp();
-            Integer port = device.getSessionServerPort();
-            String endpoint = String.format("http://%s:%d/forward", ip, port);
-            logger.info("httpForward : endpoint[{}]",endpoint);
-            if (!endpoints.contains(endpoint)) {
-                endpoints.add(endpoint);
-
-                Map<String, String> requestBody = new HashMap<>();
-                requestBody.put("rcvId", rcvId);
-                requestBody.put("data", new String(data));
-                template.postForObject(endpoint, requestBody, Void.class);
-            }
-        });
+        Map<Device, Connect> connects = dao.getConnectsByUserId(rcvId);
+        if (connects != null) {
+            logger.info("send to connected device");
+            connects.forEach((device, connect) -> {
+                String key = dao.getKey(rcvId, device);
+                byte[] encrypted = AESEncryptor.encrypt(data, key);
+                UUID sessionId = UUID.fromString(connect.getSessionId());
+                logger.info("ForwardController: forward encrypted[{}]",encrypted);
+                namespace.getClient(sessionId).sendEvent("rcv-msg", encrypted);
+            });
+        } else {
+            logger.error("connect is null");
+        }
     }
 }
