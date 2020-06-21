@@ -37,6 +37,7 @@ public class ForwardController {
     public void forward(@RequestBody String body) {
         try {
             JSONObject object = JSONObject.parseObject(body);
+            logger.info("ForwardController: forward  body[{}]",body);
             String rcvId = object.getString("rcvId");
             byte[] data = object.getString("data").getBytes();
 
@@ -46,6 +47,7 @@ public class ForwardController {
                     String key = dao.getKey(rcvId, device);
                     byte[] encrypted = AESEncryptor.encrypt(data, key);
                     UUID sessionId = UUID.fromString(connect.getSessionId());
+                    logger.info("ForwardController: forward encrypted[{}]",encrypted);
                     nps.getClient(sessionId).sendEvent("rcv-msg", encrypted);
                 });
             }
@@ -58,6 +60,7 @@ public class ForwardController {
     public void publish(@RequestBody String body) {
         try {
             JSONObject object = JSONObject.parseObject(body);
+            logger.info("ForwardController: forward publish[{}]",body);
             String userId = object.getString("userId");
             byte[] data = object.getString("notification").getBytes();
 
@@ -67,6 +70,7 @@ public class ForwardController {
                     String key = dao.getKey(userId, device);
                     byte[] encrypted = AESEncryptor.encrypt(data, key);
                     UUID sessionId = UUID.fromString(connect.getSessionId());
+                    logger.info("ForwardController: forward encrypted[{}]",encrypted);
                     nps.getClient(sessionId).sendEvent("notification", encrypted);
                 });
             }

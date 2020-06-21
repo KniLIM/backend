@@ -51,14 +51,18 @@ public class MsgHandler {
     @Autowired
     public MsgHandler(SocketIOServer server) {
         this.namespace = server.getNamespace("/sockets");
-        this.namespace.addEventListener("send-msg", byte[].class, onSendMsg());
+        this.namespace.addEventListener("send-msg",byte[].class, onSendMsg());
         this.host = HostManager.INSTANCE.getHost();
     }
 
     private DataListener<byte[]> onSendMsg() {
+        logger.info("starting on send msg");
         return (client, data, ackSender) -> {
             try {
+
+                logger.info("data[{}] ",data);
                 RedundanceProto.Redundance msg = RedundanceProto.Redundance.parseFrom(data);
+                logger.info(msg.toString());
                 ackSender.sendAckData("send-ack");
                 // 解密
                 String key = dao.getKey(msg.getSender(), DeviceUtil.fromString(msg.getDevice()));
@@ -69,6 +73,7 @@ public class MsgHandler {
                 syncMsgAmongDevices(msg.getSender(), decryptedContent, client.getSessionId().toString());
             } catch (InvalidProtocolBufferException e) {
                 ackSender.sendAckData("send-error");
+                logger.error(e.getMessage());
             }
         };
     }
@@ -123,7 +128,7 @@ public class MsgHandler {
             String ip = device.getSessionServerIp();
             Integer port = device.getSessionServerPort();
             String endpoint = String.format("http://%s:%d/forward", ip, port);
-
+            logger.info("httpForward : endpoint[{}]",endpoint);
             if (!endpoints.contains(endpoint)) {
                 endpoints.add(endpoint);
 
