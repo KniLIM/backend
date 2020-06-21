@@ -60,6 +60,7 @@ public class ConnectHandler {
         nps.addConnectListener(onConnect());
         nps.addDisconnectListener(onDisConnect());
         nps.addEventListener("hello", Void.class, onHello());
+        nps.addEventListener("leave", Void.class, onLeave());
     }
 
     /**
@@ -83,6 +84,7 @@ public class ConnectHandler {
                 socketIOClient.sendEvent("connect-error", "token error");
                 socketIOClient.disconnect();
             } else {
+                logger.info("Client[{}] userId[{}] connect", socketIOClient.getSessionId(), userId);
                 // init key
 //                logger.info("key[{}] byte[{}]", clientKey,clientKey.getBytes());
                 try {
@@ -94,11 +96,12 @@ public class ConnectHandler {
                     localRedis.addConnect(userId, device, socketIOClient.getSessionId().toString(),
                             handshake.getAddress().getHostString(), handshake.getAddress().getPort(),
                             "key");
+
                     if (localRedis.getKey(userId, device) != null) {
 //                        String hello = Arrays.toString(AESEncryptor.encrypt("hello".getBytes(), Arrays.toString(key)));
 //                        logger.info("primary final key[{}]", key);
 //                        socketIOClient.sendEvent("connect-ack", hello,getPublicKey(keyMap));
-
+                        onlineService.connect(userId,device);
                         socketIOClient.sendEvent("connect-ack", "hello");
                     } else {
                         socketIOClient.sendEvent("connect-error", "key init error");
@@ -111,12 +114,33 @@ public class ConnectHandler {
         };
     }
 
+
+
     private DisconnectListener onDisConnect() {
         return socketIOClient -> {
             HandshakeData handshake = socketIOClient.getHandshakeData();
             String userId = handshake.getSingleUrlParam("userId");
             Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
+            logger.info("Client[{}] userId[{}] disconnect", socketIOClient.getSessionId(), userId);
             localRedis.removeConnect(userId, device);
+            onlineService.disconnect(userId,device);
+        };
+    }
+
+    /**
+     * 真正的登出
+     * 将localRedis删除，但将online设置为 disconnect
+     *
+     * @return null
+     */
+    private DataListener<Void> onLeave(){
+        return (client, data, ackSender) -> {
+            HandshakeData handshake = client.getHandshakeData();
+            String userId = handshake.getSingleUrlParam("userId");
+            Device device = DeviceUtil.fromString(handshake.getSingleUrlParam("device"));
+            localRedis.removeConnect(userId, device);
+            onlineService.removeOnlineDevice(userId,device);
+            ;
         };
     }
 

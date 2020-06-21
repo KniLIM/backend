@@ -59,7 +59,6 @@ public class MsgHandler {
         logger.info("starting on send msg");
         return (client, data, ackSender) -> {
             try {
-
                 logger.info("data[{}] ",data);
                 RedundanceProto.Redundance msg = RedundanceProto.Redundance.parseFrom(data);
                 logger.info(msg.toString());
@@ -128,7 +127,7 @@ public class MsgHandler {
                 String key = dao.getKey(rcvId, device);
                 byte[] encrypted = AESEncryptor.encrypt(data, key);
                 UUID sessionId = UUID.fromString(connect.getSessionId());
-                logger.info("ForwardController: forward encrypted[{}]",encrypted);
+                logger.info("ForwardController: forward to id:[{}] device:[{}]",rcvId,device);
                 namespace.getClient(sessionId).sendEvent("rcv-msg", encrypted);
             });
         } else {
