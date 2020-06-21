@@ -41,11 +41,11 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     public boolean insert(String uid, String friend, String fName, Boolean state) {
         if(state){
             //好友表插正反两个
-            String sql1 = String.format("insert into IM.friendship" +
-                    "(uid, friend, ) values ('%s, '%s')", uid, friend);
+            String sql1 = String.format("insert into IM.friendship " +
+                    "(uid, friend) values ('%s, '%s')", uid, friend);
 
-            String sql2 = String.format("insert into IM.friendship" +
-                    "(uid, friend, ) values ('%s, '%s')", friend, uid);
+            String sql2 = String.format("insert into IM.friendship " +
+                    "(uid, friend) values ('%s, '%s')", friend, uid);
 
             //发送成功通知
             if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
@@ -170,7 +170,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
-            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select * from IM.friendship where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         Friendship friendship  = new Friendship();
