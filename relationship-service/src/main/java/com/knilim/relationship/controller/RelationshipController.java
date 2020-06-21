@@ -47,7 +47,7 @@ public class RelationshipController {
                     new Response(false, "error_msg", Error.InsertFailed.getMsg());
     }
 
-    @DeleteMapping("/friend/")
+    @DeleteMapping("/friend")
     public Response deleteRelationship(@RequestBody String json){
         JSONObject params = JSONObject.parseObject(json);
         String useId = params.getString("user_id");
