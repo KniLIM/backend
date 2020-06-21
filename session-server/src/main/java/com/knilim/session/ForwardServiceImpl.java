@@ -46,7 +46,7 @@ public class ForwardServiceImpl implements ForwardService {
 
     @Override
     public Tuple<String, Integer> getAvailableSession() {
-        return new Tuple<>(HostManager.INSTANCE.getHost(), port);
+        return new Tuple<>(HostManager.getInstance().getHost(), port);
     }
 
     @Override

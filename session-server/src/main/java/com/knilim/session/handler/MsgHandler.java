@@ -52,7 +52,7 @@ public class MsgHandler {
     public MsgHandler(SocketIOServer server) {
         this.namespace = server.getNamespace("/sockets");
         this.namespace.addEventListener("send-msg",byte[].class, onSendMsg());
-        this.host = HostManager.INSTANCE.getHost();
+        this.host = HostManager.getInstance().getHost();
     }
 
     private DataListener<byte[]> onSendMsg() {
