@@ -170,6 +170,7 @@ public class ConnectHandler {
 
             List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
             List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
+            logger.info("onHello : off[{}] \n push[{}]",offlineMsgs,pushMsgs);
             if (pushMsgs != null && !pushMsgs.isEmpty()) {
                 for (Notification pushMsg : pushMsgs) {
                     forwardService.addNotification(userId, pushMsg);
