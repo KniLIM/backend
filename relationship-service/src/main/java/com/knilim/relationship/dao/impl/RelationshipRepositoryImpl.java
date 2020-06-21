@@ -94,7 +94,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         if (isTop != null) plugin += String.format("isTop = '%s'", isTop);
         if (isBlack != null) plugin += String.format("isBlack = '%s'", isBlack);
         plugin = plugin.substring(1);
-        String sql1 = String.format("update table IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
+        String sql1 = String.format("update IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -107,7 +107,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateNickname(String uid, String friend, String nickname) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
+        String sql1 = String.format("update IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -120,7 +120,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateIsTop(String uid, String friend, Boolean isTop) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
+        String sql1 = String.format("update IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -133,7 +133,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateIsBlack(String uid, String friend, Boolean isBlack) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
+        String sql1 = String.format("update IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
