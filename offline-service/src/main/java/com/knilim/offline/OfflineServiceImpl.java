@@ -23,16 +23,20 @@ public class OfflineServiceImpl implements OfflineService {
 
     @Override
     public List<Byte[]> getOfflineMsgs(String userId) {
+        try {
+            List<Byte[]> msgs = template.boundListOps(userId).range(0, -1);
+            logger.info("getOfflineMsgs : from redis msg[{}]",msgs);
 
-        List<Byte[]> msgs = template.boundListOps(userId).range(0, -1);
-        logger.info("getOfflineMsgs : from redis msg[{}]",msgs);
-
-        if (msgs != null) {
-            template.delete(userId);
-            logger.info("getOfflineMsgs : final redis msg[{}]",msgs);
-            return msgs;
+            if (msgs != null) {
+                template.delete(userId);
+                logger.info("getOfflineMsgs : final redis msg[{}]",msgs);
+                return msgs;
+            }
+            logger.info("getOfflineMsgs : final redis msg is empty");
+            return new ArrayList<>();
+        }catch (Exception e){
+            logger.error(e.getMessage());
         }
-        logger.info("getOfflineMsgs : final redis msg is empty");
         return new ArrayList<>();
     }
 
