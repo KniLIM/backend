@@ -2,6 +2,7 @@ package com.knilim.relationship.dao.impl;
 
 import com.knilim.data.model.Friendship;
 import com.knilim.data.model.Notification;
+import com.knilim.data.model.User;
 import com.knilim.data.utils.NotificationType;
 import com.knilim.relationship.dao.RelationshipRepository;
 import com.knilim.service.ForwardService;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Objects;
 
 
 @Repository
@@ -70,7 +71,10 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
     @Override
     public boolean delete(String uid, String friend) {
-        Friendship friendship = getFriendshipByUidAndFriend(friend, uid);
+        Friendship friendship = getFriendshipByUidAndFriend(uid,friend);
+        String sql = String.format("select * from IM.user where uid = '%s'",friend);
+        RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
+        User friendUserInfo = jdbcTemplate.queryForObject(sql, rowMapper);
 
         String sql1 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
         String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
@@ -79,7 +83,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             forwardService.addNotification(friend,
                     new Notification(
                             friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
-                            friendship.getNickname(),
+                            friendship.getNickname()==null? Objects.requireNonNull(friendUserInfo).getNickName():friendship.getNickname(),
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
             return true;
