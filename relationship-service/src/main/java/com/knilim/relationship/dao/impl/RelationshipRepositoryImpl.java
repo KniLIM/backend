@@ -172,7 +172,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
-                        tempFriend friendship  = new tempFriend();
+                        Friendship friendship  = new Friendship();
                         friendship.setUid(rs.getString("uid"));
                         friendship.setFriend(rs.getString("friend"));
                         friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
