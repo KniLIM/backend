@@ -147,7 +147,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<tempFriend> getFriendsByUserId(String uid) {
         try {
-            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, avatar, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, avatar, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.friend = IM.user.id where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         tempFriend friendship  = new tempFriend();
@@ -169,7 +169,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
-            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.friend = IM.user.id where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         Friendship friendship  = new Friendship();
