@@ -14,6 +14,7 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -106,10 +107,7 @@ public class AccountController {
                 return result;
             }).collect(Collectors.toList());
 
-            // 拉取离线消息
-            List<Byte[]>  offlineMessages = offlineService.getOfflineMsgs(user.getId());
-
-            return Util.loginSuccess(resultUser, friends, groups, ipPort, offlineMessages, token);
+            return Util.loginSuccess(resultUser, friends, groups, ipPort, new ArrayList<>(), token);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
         }
@@ -173,9 +171,9 @@ public class AccountController {
         JSONObject jsonObject = JSONObject.parseObject(json);
         String keyword = jsonObject.getString("keyword");
         if(keyword == null || keyword.equals("")) return Util.searchError(Error.NoUser);
-        User user = accountRepository.searchByKeyword(keyword);
-        if(user == null) return Util.searchError(Error.NoUser);
-        return Util.searchSuccess(user);
+        List<User> users = accountRepository.searchByKeyword(keyword);
+        if(users.isEmpty()) return Util.searchError(Error.NoUser);
+        return Util.searchSuccessList(users);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
         }
@@ -217,6 +215,7 @@ class Util {
         return new Response(true,new Tuple<>("self",user),new Tuple<>("friends",friends),new Tuple<>("groups",groups),new Tuple<>("socket",ipPort), new Tuple<>("offlineMessages", messages), new Tuple<>("token", token));
     }
     static Response searchSuccess(User user) {return new Response(true,new Tuple<>("self",user));}
+    static Response searchSuccessList(List<User> users) {return new Response(true,new Tuple<>("accounts",users));}
     static Response ServerError(Error error, String detail) {
         return new Response(false, new Tuple<>("msg", error.getMsg()), new Tuple<>("detail", detail));
     }

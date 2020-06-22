@@ -6,27 +6,24 @@ import com.knilim.data.model.User;
 import com.knilim.data.utils.NotificationType;
 import com.knilim.group.dao.GroupRepository;
 import com.knilim.data.model.UserTmp;
-import com.knilim.service.PushService;
+import com.knilim.service.ForwardService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class JdbcGroupRepository implements GroupRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Reference
-    private PushService pushService;
+    private ForwardService forwardService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -59,7 +56,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         assert group != null;
         for (String user : users) {
-            pushService.addNotification(user,
+            forwardService.addNotification(user,
                     new Notification(
                             groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
                             group.getName(),
@@ -72,9 +69,23 @@ public class JdbcGroupRepository implements GroupRepository {
 
     @Override
     public Group getInfo(String groupId) throws DataAccessException {
-        String sql = String.format("select * from IM.group where id = '%s'", groupId);
         try {
-            return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Group.class));
+            return jdbcTemplate.queryForObject(
+                    "select * from IM.group as g, IM.user as u " +
+                            "where g.owner = u.id and g.id = ?",
+                    new Object[]{groupId},
+                    (rs, rowNum) ->
+                            new Group(
+                                    rs.getString("g.id"),
+                                    rs.getString("u.nickname"),
+                                    rs.getString("g.name"),
+                                    rs.getString("g.avatar"),
+                                    rs.getString("g.signature"),
+                                    rs.getString("g.announcement"),
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
+                            )
+            );
         } catch (DataAccessException e) {
             return null;
         }
@@ -94,13 +105,22 @@ public class JdbcGroupRepository implements GroupRepository {
         if (jdbcTemplate.update(sql1) != 1) return null;
         // 获取该群最新的所有信息
         try {
-            String sql2 = String.format("select * from IM.group where id = '%s'", groupId);
-            Group group =  jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Group.class));
-            assert group != null;
-            String sql3 = String.format("select * from IM.user where id = '%s'", group.getOwner());
-            String nickName = jdbcTemplate.queryForObject(sql3, new BeanPropertyRowMapper<>(String.class));
-            group.setOwner(nickName);
-            return group;
+            return jdbcTemplate.queryForObject(
+                    "select * from IM.group as g, IM.user as u " +
+                            "where g.owner = u.id and g.id = ?",
+                    new Object[]{groupId},
+                    (rs, rowNum) ->
+                            new Group(
+                                    rs.getString("g.id"),
+                                    rs.getString("u.nickname"),
+                                    rs.getString("g.name"),
+                                    rs.getString("g.avatar"),
+                                    rs.getString("g.signature"),
+                                    rs.getString("g.announcement"),
+                                    new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format
+                                            (rs.getTimestamp("created_at"))
+                            )
+            );
         } catch (DataAccessException e) {
             return null;
         }
@@ -133,7 +153,7 @@ public class JdbcGroupRepository implements GroupRepository {
     public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
                 "select * from IM.group as g, IM.user as u " +
-                        "where g.owner = u.id and (name like ? or signature like ?)",
+                        "where g.owner = u.id and (name like ? or g.signature like ?)",
                 new Object[]{"%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
@@ -181,7 +201,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         // 向群主发送消息推送
         assert group != null && user != null;
-        pushService.addNotification(group.getOwner(),
+        forwardService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
                         String.format("%s,%s,%s,%s",user.getNickName(),group.getName(),comment,group.getId()),
@@ -200,7 +220,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         if (state.equals("yes")) {
             // 向该用户发送加群成功通知
-            pushService.addNotification(userId,
+            forwardService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
                             "yes," + groupName,
@@ -213,7 +233,7 @@ public class JdbcGroupRepository implements GroupRepository {
             ) == 1;
         } else if (state.equals("no")) {
             // 向该用户发送加群失败通知
-            pushService.addNotification(userId,
+            forwardService.addNotification(userId,
                     new Notification(
                             groupId, userId, NotificationType.N_GROUP_JOIN_RESULT,
                             "no," + groupName,
@@ -234,18 +254,18 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         User user = jdbcTemplate.queryForObject(
                 "select * from IM.user where id = ?",
-                new Object[]{groupId},
+                new Object[]{userId},
                 new BeanPropertyRowMapper<>(User.class)
         );
         assert group != null && user != null;
-        pushService.addNotification(group.getOwner(),
+        forwardService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_WITHDRAW_RESULT,
                         user.getNickName() + "," + group.getName(),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
-                "delete from IM.group where gid = ? and uid = ?",
+                "delete from IM.groupship where gid = ? and uid = ?",
                 groupId, userId) == 1;
     }
 
@@ -258,14 +278,14 @@ public class JdbcGroupRepository implements GroupRepository {
                 new BeanPropertyRowMapper<>(Group.class)
         );
         assert group != null;
-        pushService.addNotification(userId,
+        forwardService.addNotification(userId,
                 new Notification(
                         userId, group.getOwner(), NotificationType.N_GROUP_KICKOFF_RESULT,
                         group.getName(),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
-                "delete from IM.group where gid = ? and uid = ?",
+                "delete from IM.groupship where gid = ? and uid = ?",
                 groupId, userId) == 1;
     }
 

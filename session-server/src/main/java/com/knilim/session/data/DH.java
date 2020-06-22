@@ -30,6 +30,28 @@ public class DH {
 
     private static final Logger logger = LoggerFactory.getLogger(DH.class);
 
+    /**
+     * 初始化甲方密钥
+     * @return Map 甲方密钥Map
+     * @throws Exception
+     */
+    public static Map<String, Object> initKey() throws Exception{
+        //实例化密钥对生成器
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
+        //初始化密钥对生成器
+        keyPairGenerator.initialize(KEY_SIZE);
+        //生成密钥对
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        //甲方公钥
+        DHPublicKey publicKey = (DHPublicKey)keyPair.getPublic();
+        //甲方私钥
+        DHPrivateKey privateKey = (DHPrivateKey)keyPair.getPrivate();
+        //将密钥对存储在Map中
+        Map<String, Object> keyMap = new HashMap<String, Object>(2);
+        keyMap.put(PUBLIC_KEY, publicKey);
+        keyMap.put(PRIVATE_KEY, privateKey);
+        return keyMap;
+    }
 
     /**
      * 根据客户端公钥 {@code key} 初始化服务器端公私钥map
@@ -41,6 +63,7 @@ public class DH {
     public static Map<String, Object> initKey(byte[] key) throws Exception {
         //解析甲方公钥
         //转换公钥材料
+        logger.info("key[{}]",key);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(key);
         //实例化密钥工厂
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
@@ -51,7 +74,7 @@ public class DH {
         //实例化密钥对生成器
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
         //初始化密钥对生成器
-        keyPairGenerator.initialize(KEY_SIZE);
+        keyPairGenerator.initialize(dhParameterSpec);
         //产生密钥对
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         //乙方公钥

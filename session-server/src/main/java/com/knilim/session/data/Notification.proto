@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.knilim.push.data";
+option java_package = "com.knilim.session.data";
 option java_outer_classname = "NotiProto";
 
 message Notification {

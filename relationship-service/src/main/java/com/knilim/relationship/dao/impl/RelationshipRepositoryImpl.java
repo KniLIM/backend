@@ -4,15 +4,14 @@ import com.knilim.data.model.Friendship;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.NotificationType;
 import com.knilim.relationship.dao.RelationshipRepository;
+import com.knilim.service.ForwardService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.annotation.Reference;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import com.knilim.service.PushService;
-import com.knilim.relationship.dao.impl.tempFriend;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +24,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Reference
-    private PushService pushService;
+    private ForwardService forwardService;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -42,14 +41,14 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         if(state){
             //好友表插正反两个
             String sql1 = String.format("insert into IM.friendship " +
-                    "(uid, friend) values ('%s, '%s')", uid, friend);
+                    "(uid, friend) values ('%s', '%s')", uid, friend);
 
             String sql2 = String.format("insert into IM.friendship " +
-                    "(uid, friend) values ('%s, '%s')", friend, uid);
+                    "(uid, friend) values ('%s', '%s')", friend, uid);
 
             //发送成功通知
             if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
-                pushService.addNotification(friend,
+                forwardService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
                             "yes," + fName,
@@ -59,7 +58,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
             } else return false;
         }else {
             //发送失败通知
-            pushService.addNotification(friend,
+            forwardService.addNotification(friend,
                     new Notification(
                             uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
                             "no," + fName,
@@ -77,7 +76,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
         if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
             //发送删除好友通知
-            pushService.addNotification(uid,
+            forwardService.addNotification(friend,
                     new Notification(
                             friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
                             friendship.getNickname(),
@@ -95,7 +94,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         if (isTop != null) plugin += String.format("isTop = '%s'", isTop);
         if (isBlack != null) plugin += String.format("isBlack = '%s'", isBlack);
         plugin = plugin.substring(1);
-        String sql1 = String.format("update table IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
+        String sql1 = String.format("update IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -108,7 +107,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateNickname(String uid, String friend, String nickname) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
+        String sql1 = String.format("update IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -121,7 +120,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateIsTop(String uid, String friend, Boolean isTop) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
+        String sql1 = String.format("update IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -134,7 +133,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public Friendship updateIsBlack(String uid, String friend, Boolean isBlack) {
         if(uid == null || friend == null) return null;
-        String sql1 = String.format("update table IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
+        String sql1 = String.format("update IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
         try {
             if (jdbcTemplate.update(sql1) != 1) return null;
             String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
@@ -170,7 +169,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
-            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select * from IM.friendship where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         Friendship friendship  = new Friendship();
@@ -189,7 +188,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
     @Override
     public void addApplication(String friendId, String useId, String uName, String instruction){
-        pushService.addNotification(useId,
+        forwardService.addNotification(friendId,
                 new Notification(
                         friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
                         String.format("%s,%s", uName, instruction),

@@ -2,6 +2,8 @@ package com.knilim.account.dao;
 
 import com.knilim.data.model.User;
 
+import java.util.List;
+
 public interface AccountRepository {
 
     /**
@@ -52,7 +54,7 @@ public interface AccountRepository {
      * @param keyword
      * @return
      */
-    User searchByKeyword(String keyword) ;
+    List<User> searchByKeyword(String keyword) ;
 
     /**
      * 邮箱或电话是否被占用

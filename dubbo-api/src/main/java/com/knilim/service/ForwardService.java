@@ -28,4 +28,6 @@ public interface ForwardService {
      *
      */
     Tuple<String, Integer> getAvailableSession();
+
+    void addNotification(String userId, Notification notification);
 }
