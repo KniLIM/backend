@@ -51,7 +51,7 @@ public final class NotiProto {
      * <code>.Notification.NotiType notificationType = 3;</code>
      * @return The notificationType.
      */
-    NotiProto.Notification.NotiType getNotificationType();
+    com.knilim.session.data.NotiProto.Notification.NotiType getNotificationType();
 
     /**
      * <code>string content = 4;</code>
@@ -178,15 +178,15 @@ public final class NotiProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return NotiProto.internal_static_Notification_descriptor;
+      return com.knilim.session.data.NotiProto.internal_static_Notification_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return NotiProto.internal_static_Notification_fieldAccessorTable
+      return com.knilim.session.data.NotiProto.internal_static_Notification_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              NotiProto.Notification.class, NotiProto.Notification.Builder.class);
+              com.knilim.session.data.NotiProto.Notification.class, com.knilim.session.data.NotiProto.Notification.Builder.class);
     }
 
     /**
@@ -312,7 +312,7 @@ public final class NotiProto {
       }
       public static final com.google.protobuf.Descriptors.EnumDescriptor
           getDescriptor() {
-        return NotiProto.Notification.getDescriptor().getEnumTypes().get(0);
+        return com.knilim.session.data.NotiProto.Notification.getDescriptor().getEnumTypes().get(0);
       }
 
       private static final NotiType[] VALUES = values();
@@ -423,10 +423,10 @@ public final class NotiProto {
      * <code>.Notification.NotiType notificationType = 3;</code>
      * @return The notificationType.
      */
-    public NotiProto.Notification.NotiType getNotificationType() {
+    public com.knilim.session.data.NotiProto.Notification.NotiType getNotificationType() {
       @SuppressWarnings("deprecation")
-      NotiProto.Notification.NotiType result = NotiProto.Notification.NotiType.valueOf(notificationType_);
-      return result == null ? NotiProto.Notification.NotiType.UNRECOGNIZED : result;
+      com.knilim.session.data.NotiProto.Notification.NotiType result = com.knilim.session.data.NotiProto.Notification.NotiType.valueOf(notificationType_);
+      return result == null ? com.knilim.session.data.NotiProto.Notification.NotiType.UNRECOGNIZED : result;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 4;
@@ -521,7 +521,7 @@ public final class NotiProto {
       if (!getReceiverBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, receiver_);
       }
-      if (notificationType_ != NotiProto.Notification.NotiType.N_FRIEND_ADD_APPLICATION.getNumber()) {
+      if (notificationType_ != com.knilim.session.data.NotiProto.Notification.NotiType.N_FRIEND_ADD_APPLICATION.getNumber()) {
         output.writeEnum(3, notificationType_);
       }
       if (!getContentBytes().isEmpty()) {
@@ -545,7 +545,7 @@ public final class NotiProto {
       if (!getReceiverBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, receiver_);
       }
-      if (notificationType_ != NotiProto.Notification.NotiType.N_FRIEND_ADD_APPLICATION.getNumber()) {
+      if (notificationType_ != com.knilim.session.data.NotiProto.Notification.NotiType.N_FRIEND_ADD_APPLICATION.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, notificationType_);
       }
@@ -565,10 +565,10 @@ public final class NotiProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof NotiProto.Notification)) {
+      if (!(obj instanceof com.knilim.session.data.NotiProto.Notification)) {
         return super.equals(obj);
       }
-      NotiProto.Notification other = (NotiProto.Notification) obj;
+      com.knilim.session.data.NotiProto.Notification other = (com.knilim.session.data.NotiProto.Notification) obj;
 
       if (!getSender()
           .equals(other.getSender())) return false;
@@ -605,69 +605,69 @@ public final class NotiProto {
       return hash;
     }
 
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static NotiProto.Notification parseFrom(byte[] data)
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static NotiProto.Notification parseFrom(java.io.InputStream input)
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static NotiProto.Notification parseDelimitedFrom(java.io.InputStream input)
+    public static com.knilim.session.data.NotiProto.Notification parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static NotiProto.Notification parseDelimitedFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static NotiProto.Notification parseFrom(
+    public static com.knilim.session.data.NotiProto.Notification parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -680,7 +680,7 @@ public final class NotiProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(NotiProto.Notification prototype) {
+    public static Builder newBuilder(com.knilim.session.data.NotiProto.Notification prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -701,21 +701,21 @@ public final class NotiProto {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:Notification)
-        NotiProto.NotificationOrBuilder {
+        com.knilim.session.data.NotiProto.NotificationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return NotiProto.internal_static_Notification_descriptor;
+        return com.knilim.session.data.NotiProto.internal_static_Notification_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return NotiProto.internal_static_Notification_fieldAccessorTable
+        return com.knilim.session.data.NotiProto.internal_static_Notification_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                NotiProto.Notification.class, NotiProto.Notification.Builder.class);
+                com.knilim.session.data.NotiProto.Notification.class, com.knilim.session.data.NotiProto.Notification.Builder.class);
       }
 
-      // Construct using com.knilim.push.data.NotiProto.Notification.newBuilder()
+      // Construct using com.knilim.session.data.NotiProto.Notification.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -749,17 +749,17 @@ public final class NotiProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return NotiProto.internal_static_Notification_descriptor;
+        return com.knilim.session.data.NotiProto.internal_static_Notification_descriptor;
       }
 
       @java.lang.Override
-      public NotiProto.Notification getDefaultInstanceForType() {
-        return NotiProto.Notification.getDefaultInstance();
+      public com.knilim.session.data.NotiProto.Notification getDefaultInstanceForType() {
+        return com.knilim.session.data.NotiProto.Notification.getDefaultInstance();
       }
 
       @java.lang.Override
-      public NotiProto.Notification build() {
-        NotiProto.Notification result = buildPartial();
+      public com.knilim.session.data.NotiProto.Notification build() {
+        com.knilim.session.data.NotiProto.Notification result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -767,8 +767,8 @@ public final class NotiProto {
       }
 
       @java.lang.Override
-      public NotiProto.Notification buildPartial() {
-        NotiProto.Notification result = new NotiProto.Notification(this);
+      public com.knilim.session.data.NotiProto.Notification buildPartial() {
+        com.knilim.session.data.NotiProto.Notification result = new com.knilim.session.data.NotiProto.Notification(this);
         result.sender_ = sender_;
         result.receiver_ = receiver_;
         result.notificationType_ = notificationType_;
@@ -812,16 +812,16 @@ public final class NotiProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof NotiProto.Notification) {
-          return mergeFrom((NotiProto.Notification)other);
+        if (other instanceof com.knilim.session.data.NotiProto.Notification) {
+          return mergeFrom((com.knilim.session.data.NotiProto.Notification)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(NotiProto.Notification other) {
-        if (other == NotiProto.Notification.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.knilim.session.data.NotiProto.Notification other) {
+        if (other == com.knilim.session.data.NotiProto.Notification.getDefaultInstance()) return this;
         if (!other.getSender().isEmpty()) {
           sender_ = other.sender_;
           onChanged();
@@ -856,11 +856,11 @@ public final class NotiProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        NotiProto.Notification parsedMessage = null;
+        com.knilim.session.data.NotiProto.Notification parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (NotiProto.Notification) e.getUnfinishedMessage();
+          parsedMessage = (com.knilim.session.data.NotiProto.Notification) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1044,17 +1044,17 @@ public final class NotiProto {
        * <code>.Notification.NotiType notificationType = 3;</code>
        * @return The notificationType.
        */
-      public NotiProto.Notification.NotiType getNotificationType() {
+      public com.knilim.session.data.NotiProto.Notification.NotiType getNotificationType() {
         @SuppressWarnings("deprecation")
-        NotiProto.Notification.NotiType result = NotiProto.Notification.NotiType.valueOf(notificationType_);
-        return result == null ? NotiProto.Notification.NotiType.UNRECOGNIZED : result;
+        com.knilim.session.data.NotiProto.Notification.NotiType result = com.knilim.session.data.NotiProto.Notification.NotiType.valueOf(notificationType_);
+        return result == null ? com.knilim.session.data.NotiProto.Notification.NotiType.UNRECOGNIZED : result;
       }
       /**
        * <code>.Notification.NotiType notificationType = 3;</code>
        * @param value The notificationType to set.
        * @return This builder for chaining.
        */
-      public Builder setNotificationType(NotiProto.Notification.NotiType value) {
+      public Builder setNotificationType(com.knilim.session.data.NotiProto.Notification.NotiType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1242,12 +1242,12 @@ public final class NotiProto {
     }
 
     // @@protoc_insertion_point(class_scope:Notification)
-    private static final NotiProto.Notification DEFAULT_INSTANCE;
+    private static final com.knilim.session.data.NotiProto.Notification DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new NotiProto.Notification();
+      DEFAULT_INSTANCE = new com.knilim.session.data.NotiProto.Notification();
     }
 
-    public static NotiProto.Notification getDefaultInstance() {
+    public static com.knilim.session.data.NotiProto.Notification getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1272,7 +1272,7 @@ public final class NotiProto {
     }
 
     @java.lang.Override
-    public NotiProto.Notification getDefaultInstanceForType() {
+    public com.knilim.session.data.NotiProto.Notification getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1301,8 +1301,8 @@ public final class NotiProto {
       "ETE_RESULT\020\002\022\034\n\030N_GROUP_JOIN_APPLICATION" +
       "\020\003\022\027\n\023N_GROUP_JOIN_RESULT\020\004\022\033\n\027N_GROUP_W" +
       "ITHDRAW_RESULT\020\005\022\032\n\026N_GROUP_KICKOFF_RESU" +
-      "LT\020\006B!\n\024com.knilim.push.dataB\tNotiProtob" +
-      "\006proto3"
+      "LT\020\006B$\n\027com.knilim.session.dataB\tNotiPro" +
+      "tob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
