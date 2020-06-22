@@ -9,7 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class JdbcAccountRepository implements AccountRepository {
@@ -78,16 +79,15 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public User searchByKeyword(String keyword) {
-        String sql = String.format("select * from IM.user where email='%s' or phone='%s' or nickname like '%%s%' ",keyword,keyword,keyword);
+    public List<User> searchByKeyword(String keyword) {
+        String sql = String.format("select * from IM.user where email='%s' or phone='%s' or nickname like '%%%s%%' ",keyword,keyword,keyword);
         RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
         User user;
         try {
-            user = jdbcTemplate.queryForObject(sql, rowMapper);
+            return jdbcTemplate.query(sql, rowMapper);
         } catch (DataAccessException e) {
-            user = null;
+            return new ArrayList<>();
         }
-        return user;
     }
 
     @Override
