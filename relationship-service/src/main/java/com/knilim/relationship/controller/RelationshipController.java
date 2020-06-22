@@ -1,202 +1,105 @@
-package com.knilim.relationship.dao.impl;
+package com.knilim.relationship.controller;
 
 import com.knilim.data.model.Friendship;
-import com.knilim.data.model.Notification;
-import com.knilim.data.utils.NotificationType;
 import com.knilim.relationship.dao.RelationshipRepository;
-import com.knilim.service.ForwardService;
-import org.apache.dubbo.config.annotation.Reference;
+import com.knilim.relationship.utils.Response;
+import com.knilim.relationship.utils.Error;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.*;
+import com.alibaba.fastjson.JSONObject;
+import com.knilim.relationship.dao.impl.tempFriend;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 import java.util.List;
 
-
-
-@Repository
-public class RelationshipRepositoryImpl implements RelationshipRepository {
-    private JdbcTemplate jdbcTemplate;
-
-    @Reference
-    private ForwardService forwardService;
+@RestController
+public class RelationshipController {
+    private RelationshipRepository relationshipRepository;
 
     @Autowired
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public void setRelationshipRepository(RelationshipRepository relationshipRepository) {
+        this.relationshipRepository = relationshipRepository;
     }
 
-    private Friendship getFriendshipByUidAndFriend(String uid, String friend){
-        String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-        return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
+    @PostMapping("/friend/application")
+    public Response createApplication(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        String uName = params.getString("u_name");
+        String instruction = params.getString("instruction");
+
+        relationshipRepository.addApplication(friendId, useId, uName, instruction);
+
+        return new Response(true, "result", null);
+
     }
 
-    @Override
-    public boolean insert(String uid, String friend, String fName, Boolean state) {
-        if(state){
-            //好友表插正反两个
-            String sql1 = String.format("insert into IM.friendship " +
-                    "(uid, friend) values ('%s', '%s')", uid, friend);
+    @PatchMapping("/friend/application")
+    public Response createRelationship(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        String fName = params.getString("f_name");
+        Boolean state = params.getBoolean("state");
+        return relationshipRepository.insert(useId, friendId, fName, state)?
+                    new Response(true, "result", null):
+                    new Response(false, "error_msg", Error.InsertFailed.getMsg());
+    }
 
-            String sql2 = String.format("insert into IM.friendship " +
-                    "(uid, friend) values ('%s', '%s')", friend, uid);
-
-            //发送成功通知
-            if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
-                forwardService.addNotification(friend,
-                    new Notification(
-                            uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            "yes," + fName,
-                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-                 );
-            return true;
-            } else return false;
-        }else {
-            //发送失败通知
-            forwardService.addNotification(friend,
-                    new Notification(
-                            uid, friend, NotificationType.N_FRIEND_ADD_RESULT,
-                            "no," + fName,
-                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-            );
-            return true;
+    @DeleteMapping("/friend")
+    public Response deleteRelationship(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        if(relationshipRepository.delete(useId, friendId)){
+            return new Response(true, "result", null);
         }
+        return new Response(false, "error_msg", Error.DeleteFailed.getMsg());
     }
 
-    @Override
-    public boolean delete(String uid, String friend) {
-        Friendship friendship = getFriendshipByUidAndFriend(friend, uid);
-
-        String sql1 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-        String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
-        if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
-            //发送删除好友通知
-            forwardService.addNotification(friend,
-                    new Notification(
-                            friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
-                            friendship.getNickname(),
-                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-            );
-            return true;
-        }else return false;
+    @PatchMapping("/friend/nickname")
+    public Response patchNickname(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        String nickname = params.getString("nickname");
+        Friendship friendship = relationshipRepository.updateNickname(useId, friendId, nickname);
+        return friendship != null ?
+                new Response(true, "result", friendship) :
+                new Response(false, "error_msg", Error.UpdateFailed.getMsg());
     }
 
-    @Override
-    public Friendship update(String uid, String friend, String nickname, Boolean isTop, Boolean isBlack) {
-        if(uid == null || friend == null) return null;
-        String plugin = "";
-        if (nickname != null) plugin += String.format("nickname = '%s'", nickname);
-        if (isTop != null) plugin += String.format("isTop = '%s'", isTop);
-        if (isBlack != null) plugin += String.format("isBlack = '%s'", isBlack);
-        plugin = plugin.substring(1);
-        String sql1 = String.format("update IM.friendship set %s where uid = '%s' and friend = '%s'", plugin, uid, friend);
-        try {
-            if (jdbcTemplate.update(sql1) != 1) return null;
-            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
-        } catch (DataAccessException e) {
-            return null;
-        }
+    @PatchMapping("/friend/top")
+    public Response patchIsTop(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        Boolean isTop = params.getBoolean("is_top");
+        Friendship friendship = relationshipRepository.updateIsTop(useId, friendId, isTop);
+        return friendship != null ?
+                new Response(true, "result", friendship) :
+                new Response(false, "error_msg", Error.UpdateFailed.getMsg());
     }
 
-    @Override
-    public Friendship updateNickname(String uid, String friend, String nickname) {
-        if(uid == null || friend == null) return null;
-        String sql1 = String.format("update IM.friendship set nickname = '%s' where uid = '%s' and friend = '%s'", nickname, uid, friend);
-        try {
-            if (jdbcTemplate.update(sql1) != 1) return null;
-            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
-        } catch (DataAccessException e) {
-            return null;
-        }
+    @PatchMapping("/friend/black")
+    public Response patchIsBlack(@RequestBody String json){
+        JSONObject params = JSONObject.parseObject(json);
+        String useId = params.getString("user_id");
+        String friendId = params.getString("friend_id");
+        Boolean isBlack = params.getBoolean("is_black");
+        Friendship friendship = relationshipRepository.updateIsBlack(useId, friendId, isBlack);
+        return friendship != null ?
+                new Response(true, "result", friendship) :
+                new Response(false, "error_msg", Error.UpdateFailed.getMsg());
     }
 
-    @Override
-    public Friendship updateIsTop(String uid, String friend, Boolean isTop) {
-        if(uid == null || friend == null) return null;
-        String sql1 = String.format("update IM.friendship set is_top = '%s' where uid = '%s' and friend = '%s'", isTop, uid, friend);
-        try {
-            if (jdbcTemplate.update(sql1) != 1) return null;
-            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
-        } catch (DataAccessException e) {
-            return null;
-        }
+    @GetMapping("/friend/{id}")
+    public Response getFriendList(@PathVariable(value = "id") String userId) {
+            List<tempFriend> friends = relationshipRepository.getFriendsByUserId(userId);
+            return friends != null ?
+                    new Response(true, "result", friends) :
+                    new Response(false, "error_msg", Error.GetFriendListFailed.getMsg());
     }
-
-    @Override
-    public Friendship updateIsBlack(String uid, String friend, Boolean isBlack) {
-        if(uid == null || friend == null) return null;
-        String sql1 = String.format("update IM.friendship set is_black = '%s' where uid = '%s' and friend = '%s'", isBlack, uid, friend);
-        try {
-            if (jdbcTemplate.update(sql1) != 1) return null;
-            String sql2 = String.format("select * from IM.friendship where uid = '%s' and friend = '%s'", uid, friend);
-            return jdbcTemplate.queryForObject(sql2, new BeanPropertyRowMapper<>(Friendship.class));
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<tempFriend> getFriendsByUserId(String uid) {
-        try {
-            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, avatar, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
-                    new Object[]{uid},
-                    (RowMapper) (rs, rowNum) -> {
-                        tempFriend friendship  = new tempFriend();
-                        friendship.setUid(rs.getString("uid"));
-                        friendship.setFriend(rs.getString("friend"));
-                        friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
-                        friendship.setIsBlack(rs.getBoolean("is_black") != null ? rs.getBoolean("is_black") : false);
-                        friendship.setIsTop(rs.getBoolean("is_top") != null ? rs.getBoolean("is_top") : false);
-                        friendship.setCreatedAt(rs.getString("created_at"));
-                        friendship.setAvatar(rs.getString("avatar"));
-                        return friendship;
-                    });
-        }catch (DataAccessException e){
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Friendship> getFriendsByUserIdRPC(String uid) {
-        try {
-            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
-                    new Object[]{uid},
-                    (RowMapper) (rs, rowNum) -> {
-                        tempFriend friendship  = new tempFriend();
-                        friendship.setUid(rs.getString("uid"));
-                        friendship.setFriend(rs.getString("friend"));
-                        friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
-                        friendship.setIsBlack(rs.getBoolean("is_black") != null ? rs.getBoolean("is_black") : false);
-                        friendship.setIsTop(rs.getBoolean("is_top") != null ? rs.getBoolean("is_top") : false);
-                        friendship.setCreatedAt(rs.getString("created_at"));
-                        return friendship;
-                    });
-        }catch (DataAccessException e){
-            return null;
-        }
-    }
-
-    @Override
-    public void addApplication(String friendId, String useId, String uName, String instruction){
-        forwardService.addNotification(friendId,
-                new Notification(
-                        friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
-                        String.format("%s,%s", uName, instruction),
-                        new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-        );
-    }
-
-
-
-    
 }
+

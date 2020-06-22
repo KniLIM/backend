@@ -147,13 +147,13 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<tempFriend> getFriendsByUserId(String uid) {
         try {
-            return jdbcTemplate.query("select * from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
+            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, avatar, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
                         tempFriend friendship  = new tempFriend();
                         friendship.setUid(rs.getString("uid"));
                         friendship.setFriend(rs.getString("friend"));
-                        friendship.setNickname(rs.getString("nickname"));
+                        friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
                         friendship.setIsBlack(rs.getBoolean("is_black"));
                         friendship.setIsTop(rs.getBoolean("is_top"));
                         friendship.setCreatedAt(rs.getString("created_at"));
@@ -169,13 +169,13 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
     @Override
     public List<Friendship> getFriendsByUserIdRPC(String uid) {
         try {
-            return jdbcTemplate.query("select * from IM.friendship where uid = ?",
+            return jdbcTemplate.query("select IM.friendship.uid as uid, friend, is_black, is_top, IM.friendship.created_at as created_at, IM.friendship.nickname as f_nickname, IM.user.nickname as u_nickname from IM.friendship join IM.user on IM.friendship.uid = IM.user.id where uid = ?",
                     new Object[]{uid},
                     (RowMapper) (rs, rowNum) -> {
-                        Friendship friendship  = new Friendship();
+                        tempFriend friendship  = new tempFriend();
                         friendship.setUid(rs.getString("uid"));
                         friendship.setFriend(rs.getString("friend"));
-                        friendship.setNickname(rs.getString("nickname"));
+                        friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
                         friendship.setIsBlack(rs.getBoolean("is_black"));
                         friendship.setIsTop(rs.getBoolean("is_top"));
                         friendship.setCreatedAt(rs.getString("created_at"));
