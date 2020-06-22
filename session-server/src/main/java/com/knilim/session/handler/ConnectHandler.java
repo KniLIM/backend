@@ -165,30 +165,26 @@ public class ConnectHandler {
             // check key for decry ping
 //            if (Arrays.equals(decryptData, "hello".getBytes())) {
             String host = InetAddress.getLocalHost().getHostAddress();
-//            onlineService.addOnlineDevice(userId, device, token, host, 9986);
             onlineService.connect(userId, device);
 
             List<Byte[]> offlineMsgs = offlineService.getOfflineMsgs(userId);
             List<Notification> pushMsgs = pushService.getOfflineNotificationByUserId(userId);
             logger.info("onHello : off[{}] \n push[{}]",offlineMsgs,pushMsgs);
+
             if (pushMsgs != null && !pushMsgs.isEmpty()) {
                 for (Notification pushMsg : pushMsgs) {
                     forwardService.addNotification(userId, pushMsg);
                 }
-                logger.info("onHello : user[{}] get offline push and say hello",userId);
-                ackRequest.sendAckData("hello");
-            } else if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
+                logger.info("onHello : user[{}] get offline push",userId);
+            }
+
+            if (offlineMsgs != null && !offlineMsgs.isEmpty()) {
                 logger.info("onHello : user[{}] get offline msg :[{}] ",userId,offlineMsgs);
                 ackRequest.sendAckData(offlineMsgs);
             } else {
                 logger.info("onHello : user[{}] get hello ",userId);
                 ackRequest.sendAckData("hello");
             }
-
-//            } else {
-//                socketIOClient.sendEvent("connect-error","hello error , it means key change error");
-//                socketIOClient.disconnect();
-//            }
         };
     }
 }

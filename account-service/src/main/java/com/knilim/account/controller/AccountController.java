@@ -14,6 +14,7 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -106,10 +107,7 @@ public class AccountController {
                 return result;
             }).collect(Collectors.toList());
 
-            // 拉取离线消息
-            List<Byte[]>  offlineMessages = offlineService.getOfflineMsgs(user.getId());
-
-            return Util.loginSuccess(resultUser, friends, groups, ipPort, offlineMessages, token);
+            return Util.loginSuccess(resultUser, friends, groups, ipPort, new ArrayList<>(), token);
         } catch (Exception e) {
             return Util.ServerError(Error.ServerError, e.getMessage());
         }
