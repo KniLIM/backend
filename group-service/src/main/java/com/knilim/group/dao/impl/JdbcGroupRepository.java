@@ -254,7 +254,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         User user = jdbcTemplate.queryForObject(
                 "select * from IM.user where id = ?",
-                new Object[]{groupId},
+                new Object[]{userId},
                 new BeanPropertyRowMapper<>(User.class)
         );
         assert group != null && user != null;
