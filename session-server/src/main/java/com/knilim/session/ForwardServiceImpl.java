@@ -73,6 +73,7 @@ public class ForwardServiceImpl implements ForwardService {
                 .setNotificationType(NotiProto.Notification.NotiType
                         .forNumber(notification.getType().ordinal()))
                 .setContent(notification.getContent())
+                .setCreateAt(notification.getCreateAt())
                 .build()
                 .toByteArray();
     }

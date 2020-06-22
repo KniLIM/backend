@@ -76,7 +76,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
         String sql2 = String.format("delete from IM.friendship where uid = '%s' and friend = '%s'", friend, uid);
         if(jdbcTemplate.update(sql1) == 1 && jdbcTemplate.update(sql2) == 1){
             //发送删除好友通知
-            forwardService.addNotification(uid,
+            forwardService.addNotification(friend,
                     new Notification(
                             friend, uid, NotificationType.N_FRIEND_DELETE_RESULT,
                             friendship.getNickname(),
@@ -188,7 +188,7 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
     @Override
     public void addApplication(String friendId, String useId, String uName, String instruction){
-        forwardService.addNotification(useId,
+        forwardService.addNotification(friendId,
                 new Notification(
                         friendId, useId, NotificationType.N_FRIEND_ADD_APPLICATION,
                         String.format("%s,%s", uName, instruction),
