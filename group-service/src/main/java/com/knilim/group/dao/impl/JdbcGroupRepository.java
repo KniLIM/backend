@@ -153,7 +153,7 @@ public class JdbcGroupRepository implements GroupRepository {
     public List<Group> getGroupsByKeyword(String Keyword) {
         return jdbcTemplate.query(
                 "select * from IM.group as g, IM.user as u " +
-                        "where g.owner = u.id and (name like ? or signature like ?)",
+                        "where g.owner = u.id and (name like ? or g.signature like ?)",
                 new Object[]{"%" + Keyword + "%", "%" + Keyword + "%"},
                 (rs, rowNum) ->
                         new Group(
