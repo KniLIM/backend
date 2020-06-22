@@ -79,7 +79,7 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public User searchByKeyword(String keyword) {
-        String sql = String.format("select * from IM.user where email='%s' or phone='%s' or nickname like '%%s%' ",keyword,keyword,keyword);
+        String sql = String.format("select * from IM.user where email='%s' or phone='%s' or nickname like '%%%s%%' ",keyword,keyword,keyword);
         RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
         User user;
         try {
