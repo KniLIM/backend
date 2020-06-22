@@ -9,15 +9,11 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.knilim.data.model.Notification;
 import com.knilim.data.utils.Device;
 import com.knilim.data.utils.DeviceUtil;
-import com.knilim.service.ForwardService;
 import com.knilim.service.OfflineService;
 import com.knilim.service.OnlineService;
 import com.knilim.service.PushService;
 import com.knilim.session.ForwardServiceImpl;
 import com.knilim.session.dao.ClientDao;
-import com.knilim.session.data.AESEncryptor;
-import com.knilim.session.data.DH;
-import com.knilim.session.model.Connect;
 import org.apache.dubbo.config.annotation.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +22,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import static com.knilim.session.data.DH.*;
 
 @Component
 public class ConnectHandler {
