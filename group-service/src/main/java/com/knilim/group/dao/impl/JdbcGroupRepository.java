@@ -265,7 +265,7 @@ public class JdbcGroupRepository implements GroupRepository {
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
-                "delete from IM.group where gid = ? and uid = ?",
+                "delete from IM.groupship where gid = ? and uid = ?",
                 groupId, userId) == 1;
     }
 
@@ -285,7 +285,7 @@ public class JdbcGroupRepository implements GroupRepository {
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return jdbcTemplate.update(
-                "delete from IM.group where gid = ? and uid = ?",
+                "delete from IM.groupship where gid = ? and uid = ?",
                 groupId, userId) == 1;
     }
 
