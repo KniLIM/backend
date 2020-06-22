@@ -154,8 +154,8 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
                         friendship.setUid(rs.getString("uid"));
                         friendship.setFriend(rs.getString("friend"));
                         friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
-                        friendship.setIsBlack(rs.getBoolean("is_black"));
-                        friendship.setIsTop(rs.getBoolean("is_top"));
+                        friendship.setIsBlack(rs.getBoolean("is_black") != null ? rs.getBoolean("is_black") : false);
+                        friendship.setIsTop(rs.getBoolean("is_top") != null ? rs.getBoolean("is_top") : false);
                         friendship.setCreatedAt(rs.getString("created_at"));
                         friendship.setAvatar(rs.getString("avatar"));
                         return friendship;
@@ -176,8 +176,8 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
                         friendship.setUid(rs.getString("uid"));
                         friendship.setFriend(rs.getString("friend"));
                         friendship.setNickname(rs.getString("f_nickname") != null ? rs.getString("f_nickname"): rs.getString("u_nickname"));
-                        friendship.setIsBlack(rs.getBoolean("is_black"));
-                        friendship.setIsTop(rs.getBoolean("is_top"));
+                        friendship.setIsBlack(rs.getBoolean("is_black") != null ? rs.getBoolean("is_black") : false);
+                        friendship.setIsTop(rs.getBoolean("is_top") != null ? rs.getBoolean("is_top") : false);
                         friendship.setCreatedAt(rs.getString("created_at"));
                         return friendship;
                     });
