@@ -81,6 +81,14 @@ public class GroupController {
                   new Response(false, "error_msg", Error.GetGroupListByKeywordFailed.getMsg());
     }
 
+    @GetMapping("/group/user")
+    public Response getGroupListById(@RequestParam("user_id") String userId) {
+        List<Group> groups = groupRepository.getGroupsByUserId((userId));
+        return groups != null ?
+                new Response(true,"result",groups) :
+                new Response(false,"error_msg", Error.GetGroupListByUserIdFailed.getMsg());
+    }
+
     @GetMapping("/group/{id}/member")
     public Response getMembers(@PathVariable(value = "id") String id) {
         List<UserTmp> users = groupRepository.getMembers(id);
