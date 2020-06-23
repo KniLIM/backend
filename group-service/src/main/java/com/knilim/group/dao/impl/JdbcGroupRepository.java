@@ -100,6 +100,7 @@ public class JdbcGroupRepository implements GroupRepository {
         if (avatar != null) plugin += String.format(", avatar = '%s'", avatar);
         if (signature != null) plugin += String.format(", signature = '%s'", signature);
         if (announcement != null) plugin += String.format(", announcement = '%s'", announcement);
+        if (plugin.length() <= 0) return null;
         plugin = plugin.substring(1);
         String sql1 = String.format("update IM.group set %s where id = '%s'", plugin, groupId);
         if (jdbcTemplate.update(sql1) != 1) return null;
@@ -196,7 +197,7 @@ public class JdbcGroupRepository implements GroupRepository {
         );
         User user = jdbcTemplate.queryForObject(
                 "select * from IM.user where id = ?",
-                new Object[]{groupId},
+                new Object[]{userId},
                 new BeanPropertyRowMapper<>(User.class)
         );
         // 向群主发送消息推送
@@ -204,7 +205,7 @@ public class JdbcGroupRepository implements GroupRepository {
         forwardService.addNotification(group.getOwner(),
                 new Notification(
                         group.getOwner(), userId, NotificationType.N_GROUP_JOIN_APPLICATION,
-                        String.format("%s,%s,%s,%s",user.getNickName(),group.getName(),comment,group.getId()),
+                        String.format("%s,%s,%s,%s", user.getNickName(), group.getName(), comment, group.getId()),
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
         );
         return false;
@@ -226,11 +227,9 @@ public class JdbcGroupRepository implements GroupRepository {
                             "yes," + groupName,
                             new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
             );
+            String sql = String.format("insert into IM.groupship (uid, gid, is_admin) values ('%s', '%s', %d)", userId, groupId, 0);
             // 将该用户添加到群组关系表
-            return jdbcTemplate.update(
-                    "insert into IM.groupship (uid, gid, is_admin) values ('?', '?', '?')",
-                    userId, groupId, 0
-            ) == 1;
+            return jdbcTemplate.update(sql) == 1;
         } else if (state.equals("no")) {
             // 向该用户发送加群失败通知
             forwardService.addNotification(userId,
