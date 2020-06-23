@@ -129,10 +129,10 @@ public class GroupController {
     }
 
     @PostMapping("/group/{id}/expel")
-    public Response expelGroup(@PathVariable(value = "id") String groupId,
+    public Response expelGroup(@PathVariable(value = "id") String id,
                                @RequestBody String json) {
         String userId = JSONObject.parseObject(json).getString("user_id");
-        return groupRepository.expel(groupId, userId) ?
+        return groupRepository.expel(id, userId) ?
                 new Response(true, "result", null) :
                 new Response(false, "error_msg", Error.ExpelGroupFailed.getMsg());
     }

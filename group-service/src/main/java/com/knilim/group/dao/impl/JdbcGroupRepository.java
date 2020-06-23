@@ -55,14 +55,14 @@ public class JdbcGroupRepository implements GroupRepository {
                 new BeanPropertyRowMapper<>(Group.class)
         );
         assert group != null;
-        for (String user : users) {
-            forwardService.addNotification(user,
-                    new Notification(
-                            groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
-                            group.getName(),
-                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
-            );
-        }
+//        for (String user : users) {
+//            forwardService.addNotification(user,
+//                    new Notification(
+//                            groupId, group.getOwner(), NotificationType.N_GROUP_DELETE,
+//                            group.getName(),
+//                            new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date().getTime()))
+//            );
+//        }
         String sql = String.format("delete from IM.group where id = '%s'", groupId);
         return jdbcTemplate.update(sql) == 1;
     }
