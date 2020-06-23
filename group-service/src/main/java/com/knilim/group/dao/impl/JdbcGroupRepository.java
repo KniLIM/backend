@@ -215,11 +215,9 @@ public class JdbcGroupRepository implements GroupRepository {
     @Override
     public boolean handleParticipation(String groupId, String userId, String state) {
         // 根据state不同发送不同的推送通知
-        String groupName = jdbcTemplate.queryForObject(
-                "select `name` from IM.group where id = ?",
-                new Object[]{groupId},
-                new BeanPropertyRowMapper<>(String.class)
-        );
+        String sql1 = String.format("select `name` from IM.group where id = '%s'", groupId);
+        String groupName = jdbcTemplate.queryForObject(sql1, String.class);
+        if(groupName == null) groupName = "";
         if (state.equals("yes")) {
             // 向该用户发送加群成功通知
             forwardService.addNotification(userId,
