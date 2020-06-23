@@ -71,8 +71,8 @@ public class RelationshipRepositoryImpl implements RelationshipRepository {
 
     @Override
     public boolean delete(String uid, String friend) {
-        Friendship friendship = getFriendshipByUidAndFriend(uid,friend);
-        String sql = String.format("select * from IM.user where id = '%s'",friend);
+        Friendship friendship = getFriendshipByUidAndFriend(friend,uid);
+        String sql = String.format("select * from IM.user where id = '%s'",uid);
         RowMapper<User> rowMapper = new BeanPropertyRowMapper<>(User.class);
         User friendUserInfo = jdbcTemplate.queryForObject(sql, rowMapper);
 
